@@ -16,6 +16,13 @@ def read_and_clean(file_path):
 
     return df
 
+def to_master(df):
+
+    # Figure out how to check if master file exists and then either create one or append onto the end of one 
+    df.to_csv("./Data/master_record.csv", mode='a', header=False)
+
+    return "Complete"
+
 file_path = input("Please enter the file path of the CSV file to read and clean: ")
 cleaned_data = read_and_clean(file_path)
-print("Cleaned Data: \n", cleaned_data)
+to_master(cleaned_data)
