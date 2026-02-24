@@ -1,28 +1,60 @@
+import os 
 import pandas as pd
+import logging
 
-def read_and_clean(file_path):
-    # Read the CSV file into a DataFrame
-    df = pd.read_csv(file_path, names=['Date', 'Amount', 'Desc', 'Balance'], header=None, parse_dates=['Date'], dayfirst=True)
+class FinancialTracker:
+    """A finnacial tracker designed to help make inform make data based decisions"""    
+    def __init__(self):
 
-    # Drop rows with missing values
-    df.dropna(inplace=True)
+        # Creates a instance variable with the file path
+        self.origin_path = os.getcwd()
+        self.data_folder = os.path.join(self.origin_path, 'data')
+        self.master_record_path = os.path.join(self.data_folder, 'master_record.csv')
 
-    # Sort by date to maintain chronological order
-    df.sort_values(by=['Date'], inplace=True, ascending=True)
+        # Checking if the master file exists
+        # Currently assumes ./Data/ exists if the user doesn't have ./Data/master_record.csv 
+        if os.path.exists(self.master_record_path):
 
-    # Add index as transaction ID after dropping rows
-    df.insert(0, 'Transaction ID', range(1, len(df) + 1))
-    df.set_index('Transaction ID', inplace=True)
+            # Checks structure of file is correct
+            master_record = pd.read_csv(self.master_record_path)
+            if master_record.columns.tolist() == ['Date', 'Amount', 'Desc', 'Balance']:
+                logging.debug('master_record initialised correctly')
+            else:
+                raise ValueError('master_record exists with incorrect headers')
+            
+        # Creates it if it doesn't exist
+        else:
+            master_record = pd.DataFrame(columns=['Date', 'Amount', 'Desc', 'Balance'])
+            if os.path.exists(self.data_folder):
+                master_record.to_csv(self.master_record_path, index=False)
+            else:
+                os.mkdir(self.data_folder)
+                master_record.to_csv(self.master_record_path, index=False)
 
-    return df
 
-def to_master(df):
+    def read_and_clean(self, file_path):
+        # Read the CSV file into a DataFrame
+        df = pd.read_csv(file_path, names=['Date', 'Amount', 'Desc', 'Balance'], header=None, parse_dates=['Date'], dayfirst=True)
 
-    # Figure out how to check if master file exists and then either create one or append onto the end of one 
-    df.to_csv("./Data/master_record.csv", mode='a', header=False)
+        # Sort by date to maintain chronological order
+        df.sort_values(by=['Date'], inplace=True, ascending=True)
 
-    return "Complete"
+        # Drops na values if the amount or date is missing
+        df.dropna(subset=['Date','Amount'], inplace=True)
 
-file_path = input("Please enter the file path of the CSV file to read and clean: ")
-cleaned_data = read_and_clean(file_path)
-to_master(cleaned_data)
+        # Add index as transaction ID
+        df.insert(0, 'Transaction ID', range(1, len(df) + 1))
+        df.set_index('Transaction ID', inplace=True)
+
+        self.to_master(df)
+
+        return df
+
+    def to_master(self, df):
+        """Updates master_record.csv to include new data"""
+        # Appends to master_record.csv the new data
+        df.to_csv(self.master_record_path, mode='a', header=False, index=False)
+
+tracker = FinancialTracker()
+file_path = 'Personal.csv' # input("Please enter the file path of the CSV file to read and clean: ")
+tracker.read_and_clean(file_path)
