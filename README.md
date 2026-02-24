@@ -16,3 +16,4 @@ To create a program that takes in CSV files downloaded from my bank (may expand 
 
 ## Lessons learnt
 
+* using correct os command to ensure file referencing is valid across operating systems
