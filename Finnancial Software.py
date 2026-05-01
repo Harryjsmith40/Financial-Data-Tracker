@@ -4,6 +4,13 @@ import logging
 
 class FinancialTracker:
     """A finnacial tracker designed to help make inform make data based decisions"""    
+    # Defines the dtypes of the master record
+    schema = {
+        'dtypes': {'Amount': float, 'Balance': float, 'Desc': str},
+        'date_columns': ['Date'],
+        'date_format' : '%d/%m/%Y'
+        }
+
     def __init__(self):
 
         # Creates a instance variable with the file path
@@ -30,11 +37,18 @@ class FinancialTracker:
             else:
                 os.mkdir(self.data_folder)
                 master_record.to_csv(self.master_record_path, index=False)
-
+    
+    def read_master(self):
+        """Reads the master file"""
+        master_record = pd.read_csv(self.master_record_path, dtype=self.schema['dtypes'], parse_dates=self.schema['date_columns'], date_format=self.schema['date_format']
+)
+        return master_record
 
     def read_and_clean(self, file_path):
+        """Reads CSV files, formates dates and data types, removes null data and adds an index"""
         # Read the CSV file into a DataFrame
-        df = pd.read_csv(file_path, names=['Date', 'Amount', 'Desc', 'Balance'], header=None, parse_dates=['Date'], dayfirst=True)
+        df = pd.read_csv(file_path, names=['Date', 'Amount', 'Desc', 'Balance'], header=None, dtype=self.schema['dtypes'], parse_dates=self.schema['date_columns'], date_format=self.schema['date_format']
+)
 
         # Sort by date to maintain chronological order
         df.sort_values(by=['Date'], inplace=True, ascending=True)
@@ -42,19 +56,23 @@ class FinancialTracker:
         # Drops na values if the amount or date is missing
         df.dropna(subset=['Date','Amount'], inplace=True)
 
-        # Add index as transaction ID
-        df.insert(0, 'Transaction ID', range(1, len(df) + 1))
-        df.set_index('Transaction ID', inplace=True)
-
-        self.to_master(df)
-
         return df
+    
+    def deduplicate(self, file_path):
+        # Checks for duplicates
+        master_record = self.read_master()
+        df = self.read_and_clean(file_path)
+        merged_df = df.merge(master_record, how='left', on=['Date', 'Amount', 'Desc', 'Balance'], indicator=True)
+        merged_df = merged_df[merged_df['_merge'] == 'left_only']
+        merged_df = merged_df.drop(labels='_merge' , axis='columns')
+
+        self.to_master(merged_df)
 
     def to_master(self, df):
         """Updates master_record.csv to include new data"""
         # Appends to master_record.csv the new data
-        df.to_csv(self.master_record_path, mode='a', header=False, index=False)
+        df.to_csv(self.master_record_path, mode='a', header=False, index=False, date_format=self.schema['date_format'])
 
 tracker = FinancialTracker()
 file_path = 'Personal.csv' # input("Please enter the file path of the CSV file to read and clean: ")
-tracker.read_and_clean(file_path)
+tracker.deduplicate(file_path)

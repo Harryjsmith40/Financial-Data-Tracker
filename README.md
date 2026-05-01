@@ -17,3 +17,5 @@ To create a program that takes in CSV files downloaded from my bank (may expand 
 ## Lessons learnt
 
 * using correct os command to ensure file referencing is valid across operating systems
+* refreshed the correct us of classes and methods within classes including referencing
+* refreshed pandas logic and methods to clean dataframes
