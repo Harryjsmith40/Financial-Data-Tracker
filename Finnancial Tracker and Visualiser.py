@@ -6,7 +6,7 @@ class FinancialTracker:
     """A finnacial tracker designed to help make inform make data based decisions"""    
     # Defines the dtypes of the master record
     schema = {
-        'dtypes': {'Amount': float, 'Balance': float, 'Desc': str},
+        'dtypes': {'Amount': float, 'Balance': float, 'Desc': str, 'Account': str},
         'date_columns': ['Date'],
         'date_format' : '%d/%m/%Y'
         }
@@ -23,14 +23,14 @@ class FinancialTracker:
         if os.path.exists(self.master_record_path):
             # Checks structure of file is correct
             master_record = pd.read_csv(self.master_record_path)
-            if master_record.columns.tolist() == ['Date', 'Amount', 'Desc', 'Balance']:
+            if master_record.columns.tolist() == ['Date', 'Amount', 'Desc', 'Balance', 'Account Name', 'Account Type']:
                 logging.debug('master_record initialised correctly')
             else:
                 raise ValueError('master_record exists with incorrect headers')
             
         # Creates it if it doesn't exist
         else:
-            master_record = pd.DataFrame(columns=['Date', 'Amount', 'Desc', 'Balance'])
+            master_record = pd.DataFrame(columns=['Date', 'Amount', 'Desc', 'Balance', 'Account Name', 'Account Type'])
             if os.path.exists(self.data_folder):
                 master_record.to_csv(self.master_record_path, index=False)
             else:
@@ -59,15 +59,14 @@ class FinancialTracker:
 
         return df
     
-    def deduplicate(self, file_path):
+    def deduplicate(self, cleaned_input):
         """ Checks for and removes duplicates""" 
         master_record = self.read_master()
-        df = self.read_and_clean(file_path)
-        merged_df = df.merge(master_record, how='left', on=['Date', 'Amount', 'Desc', 'Balance'], indicator=True)
+        merged_df = cleaned_input.merge(master_record, how='left', on=['Date', 'Amount', 'Desc', 'Balance', 'Account Name'], indicator=True)
         merged_df = merged_df[merged_df['_merge'] == 'left_only']
         merged_df = merged_df.drop(labels='_merge' , axis='columns')
 
-        self.to_master(merged_df)
+        return merged_df
 
     def to_master(self, df):
         """Updates master_record.csv to include new data"""
@@ -75,13 +74,23 @@ class FinancialTracker:
         df.to_csv(self.master_record_path, mode='a', header=False, index=False, date_format=self.schema['date_format'])
     
     def upload_file(self):
-        """Asks the user to input a file name and checks if it exists, if it does it is uploaded and deduplicated, if not the user is asked to input a file name again"""
+        """Prompts the user to upload a file, checks if it exists and then processes it"""
         self.file_path = input("Please ensure the CSV file is in the data folder and provide the file name would like to upload: ")
         self.file_path = os.path.join(self.data_folder, self.file_path)
 
+        self.account_name = input("Please provide the name of the account this data is from: ")
+        self.account_type = input("Please provide the type of this account (e.g. current, savings, credit card): ")
+
         if os.path.exists(self.file_path):
-            self.deduplicate(self.file_path)
+            cleaned_input = self.read_and_clean(self.file_path)
             logging.debug('file_path exists correctly')
+
+            cleaned_input['Account Name'] = self.account_name
+            cleaned_input['Account Type'] = self.account_type
+
+            deuplicated_input = self.deduplicate(cleaned_input)
+
+            self.to_master(deuplicated_input)
         else:
             print("Failed file doesn't exist") 
             self.upload_file()
