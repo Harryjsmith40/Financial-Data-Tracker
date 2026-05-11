@@ -1,4 +1,5 @@
-from operator import index
+from config import schema, data_folder, master_record_path, account_info_path
+
 import os
 import pandas as pd
 import logging
@@ -6,25 +7,15 @@ import logging
 class FinancialTracker:
     """A finnacial tracker designed to help make inform make data based decisions"""    
     # Defines the dtypes of the master record
-    schema = {
-        'dtypes': {'Amount': float, 'Desc': str, 'Balance': float, 'Account Name': str, 'Account Type': str},
-        'input_dtypes': {'Amount': float, 'Desc': str, 'Balance': float},
-        'date_columns': ['Date'],
-        'date_format' : '%d/%m/%Y'
-        }
+    schema = schema
 
     def __init__(self):
         """Initialises the master record and uploads a new file"""
-        # Creates a instance variable with the file path
-        self.origin_path = os.getcwd()
-        self.data_folder = os.path.join(self.origin_path, 'data')
-        self.master_record_path = os.path.join(self.data_folder, 'master_record.csv')
-
         # Checking if the master file exists
         # Currently assumes ./Data/ exists if the user doesn't have ./Data/master_record.csv 
-        if os.path.exists(self.master_record_path):
+        if os.path.exists(master_record_path):
             # Checks structure of file is correct
-            master_record = pd.read_csv(self.master_record_path)
+            master_record = pd.read_csv(master_record_path)
             if master_record.columns.tolist() == ['Date', 'Amount', 'Desc', 'Balance', 'Account Name', 'Account Type']:
                 logging.debug('master_record initialised correctly')
             else:
@@ -33,28 +24,27 @@ class FinancialTracker:
         # Creates it if it doesn't exist
         else:
             master_record = pd.DataFrame(columns=['Date', 'Amount', 'Desc', 'Balance', 'Account Name', 'Account Type'])
-            if os.path.exists(self.data_folder):
-                master_record.to_csv(self.master_record_path, index=False)
+            if os.path.exists(data_folder):
+                master_record.to_csv(master_record_path, index=False)
             else:
-                os.mkdir(self.data_folder)
-                master_record.to_csv(self.master_record_path, index=False)
+                os.mkdir(data_folder)
+                master_record.to_csv(master_record_path, index=False)
 
         # Creates a csv to store account names and types
-        self.account_info_path = os.path.join(self.data_folder, 'accounts.csv')
-        if os.path.exists(self.account_info_path):
-            self.account_info = pd.read_csv(self.account_info_path)
+        if os.path.exists(account_info_path):
+            self.account_info = pd.read_csv(account_info_path)
             if self.account_info.columns.tolist() == ['Account Name', 'Account Type', 'Last Updated']:
                 logging.debug('account_info initialised correctly')
         else:
             account_info_df = pd.DataFrame(columns=['Account Name', 'Account Type', 'Last Updated'])
-            account_info_df.to_csv(self.account_info_path, index=False)
+            account_info_df.to_csv(account_info_path, index=False)
             self.account_info = account_info_df
         
         self.upload_file()
     
     def read_master(self):
         """Reads the master file"""
-        master_record = pd.read_csv(self.master_record_path, dtype=self.schema['dtypes'], parse_dates=self.schema['date_columns'], date_format=self.schema['date_format']
+        master_record = pd.read_csv(master_record_path, dtype=self.schema['dtypes'], parse_dates=self.schema['date_columns'], date_format=self.schema['date_format']
 )
         return master_record
 
@@ -63,11 +53,17 @@ class FinancialTracker:
         # Read the CSV file into a DataFrame
         df = pd.read_csv(file_path, names=['Date', 'Amount', 'Desc', 'Balance'], header=None, dtype=self.schema['input_dtypes'], parse_dates=self.schema['date_columns'], date_format=self.schema['date_format']
 )
-        # Sort by date to maintain chronological order
-        df.sort_values(by=['Date'], inplace=True, ascending=True)
-
         # Drops na values if the amount or date is missing
         df.dropna(subset=['Date','Amount'], inplace=True)
+
+        # Used to preserve intra-day transaction order from original export as resolution is 1 days but original export hold order of transactions within the day
+        df.insert(0, 'Transaction Order', range(1, len(df) + 1))
+
+        # Sort by date to maintain chronological order - Transaction Order descending as bank exports are reverse chronological
+        df.sort_values(by=['Date', 'Transaction Order'], inplace=True, ascending=[True, False])
+        
+        # Drops column in order to preserve simplifed file
+        df.drop(columns=['Transaction Order'], inplace=True)
 
         return df
     
@@ -83,12 +79,12 @@ class FinancialTracker:
     def to_master(self, df):
         """Updates master_record.csv to include new data"""
         # Appends to master_record.csv the new data
-        df.to_csv(self.master_record_path, mode='a', header=False, index=False, date_format=self.schema['date_format'])
+        df.to_csv(master_record_path, mode='a', header=False, index=False, date_format=self.schema['date_format'])
     
     def upload_file(self):
         """Prompts the user for the file name"""
         self.file_path = input("Please ensure the CSV file is in the data folder and provide the file name would like to upload: ")
-        self.file_path = os.path.join(self.data_folder, self.file_path)
+        self.file_path = os.path.join(data_folder, self.file_path)
 
         # Checks if the provided file name exists
         if os.path.exists(self.file_path):
@@ -106,7 +102,7 @@ class FinancialTracker:
                 account_name = input("Please provide the name of the account this data is from: ")
                 account_type = input("Please provide the type of this account (e.g. current, savings, credit card): ")
                 new_account_info = pd.DataFrame({'Account Name': [account_name], 'Account Type': [account_type], 'Last Updated': [pd.Timestamp.now()]})
-                new_account_info.to_csv(self.account_info_path, mode='a', header=False, index=False)
+                new_account_info.to_csv(account_info_path, mode='a', header=False, index=False)
                 cleaned_input['Account Name'] = account_name
                 cleaned_input['Account Type'] = account_type
 
@@ -115,7 +111,7 @@ class FinancialTracker:
                 self.account_info.loc[int(self.account_name_option),'Last Updated'] = str(pd.Timestamp.now())
                 cleaned_input['Account Name'] = self.account_info.loc[int(self.account_name_option)].iat[0]
                 cleaned_input['Account Type'] = self.account_info.loc[int(self.account_name_option)].iat[1]
-                self.account_info.to_csv(self.account_info_path, index=False)
+                self.account_info.to_csv(account_info_path, index=False)
 
             # Fall back for invalid input
             else:
@@ -124,8 +120,6 @@ class FinancialTracker:
 
             deduplicated_input = self.deduplicate(cleaned_input)
             
-            print(deduplicated_input)
-
             self.to_master(deduplicated_input)
 
         else:
