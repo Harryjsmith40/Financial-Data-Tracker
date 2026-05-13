@@ -1,2 +1,3 @@
 /Data/
-/Planning.md
+__pycache__/
+*.pyc

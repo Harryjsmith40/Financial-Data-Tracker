@@ -42,3 +42,9 @@ Pandas
 ML Model building and training
 Seaborn
 Git
+
+## Feature Ideas
+
+* Option to delete the File after uploading it
+* Link to commbank directly via API
+* 
