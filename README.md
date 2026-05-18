@@ -105,11 +105,8 @@ Pandas
 ML Model building and training
 Matplotlib
 Git
-<<<<<<< Updated upstream
-=======
 
 ## Feature Ideas
 
 * Option to delete the File after uploading it
 * Link to commbank directly via API
->>>>>>> Stashed changes
