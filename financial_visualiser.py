@@ -20,9 +20,16 @@ class FinancialVisualiser:
     def networth_plot(self, master_record):
         '''Displays a graph of networth over time'''
 
-        # Prepares data for plotting by filtering out all but the last transaction on each day and filling days with no transactions
+        # Prepares data for plotting by converting the table to a pivot table
+        # Aligns axis for plotting Index = Date, columns='Account Name', values='Balance'
+        # aggfunc=last - Keepings the last entry if multiple on the same date (this lines up with the way the input CSV is formatted from CommBank)
         pivot_master = master_record.pivot_table(index='Date', columns='Account Name', values='Balance', aggfunc='last')
+        # Fills the days with no transactions on with the data from the last entry.
+        # This is done as balance remains the same if no transaction happened
+        # this enables the resolution to be a single day
         filled_master = pivot_master.ffill(axis='index')
+        # Now there is one transaction per day we can sum those across all accounts
+        # in order to get the Total balance per dayor net worth on a given day
         daily_networth = filled_master.sum(axis='columns')
 
         self.plot_graph(daily_networth)
@@ -58,7 +65,7 @@ class FinancialVisualiser:
     def spending_or_income_plot(self, master_record, transaction_type):
         '''Displays a graph of income or expenses and cleans out internal transfers'''
 
-        # Branches for expenses or income graphs
+        # Filters for the master record to expenses or income based on choice
         if transaction_type == 'Expenses':
             filtered_current = master_record[master_record['Amount'] < 0]
 
@@ -70,7 +77,7 @@ class FinancialVisualiser:
         mask = filtered_current['Desc'].str.contains(r'Transfer.*xx\d{4}', case=False, na=False)
         filtered_current= filtered_current[~mask]
 
-        # Converts to pivot table and sums daily transactions across all accounts into one datum
+        # Converts to pivot table for plotting and sums daily transactions across all accounts into one datum
         pivot_filter_current = filtered_current.pivot_table(index='Date', columns='Account Name', values='Amount', aggfunc='sum')
         daily_transactions = pivot_filter_current.sum(axis='columns')
 

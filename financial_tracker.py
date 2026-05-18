@@ -148,7 +148,7 @@ class FinancialTracker:
             if self.file_path_option.upper() == 'B':
                 break
             
-            # adds the rest of the file path to the file name
+            # Uses the schema file paths to create the full file path for the CSV
             self.file_path = os.path.join(data_folder, self.file_path_option)
 
             # Checks if the provided file/path exists
@@ -172,7 +172,7 @@ class FinancialTracker:
                 # Writes the uploaded file to the master record
                 self.to_master(deduplicated_input)
 
-            # Fall back for invalid input
+            # Raises issue if file doesn't exist
             else:
                 logging.info('Failed file does not exist')
-                raise IndexError('Upload file - Failed file does not exist')
+                print('Upload file - Failed file does not exist')
