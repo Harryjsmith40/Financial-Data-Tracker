@@ -1,6 +1,7 @@
 /Data/
 <<<<<<< Updated upstream
-/Planning.md
+__pycache__/
+*.pyc
 =======
 __pycache__/
 *.pyc
