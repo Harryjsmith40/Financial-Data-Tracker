@@ -17,8 +17,9 @@ class FinancialTracker:
             # Checks structure of file is correct
             master_record = pd.read_csv(master_record_path)
             if master_record.columns.tolist() == ['Date', 'Amount', 'Desc', 'Balance', 'Account Name', 'Account Type']:
-                logging.debug('master_record initialised correctly')
-            else:
+                logging.info('master_record initialised correctly')
+            else: 
+                logging.error('master_record exists with incorrect headers')
                 raise ValueError('master_record exists with incorrect headers')
             
         # Creates it if it doesn't exist
@@ -53,8 +54,8 @@ class FinancialTracker:
         # Read the CSV file into a DataFrame
         df = pd.read_csv(file_path, names=['Date', 'Amount', 'Desc', 'Balance'], header=None, dtype=self.schema['input_dtypes'], parse_dates=self.schema['date_columns'], date_format=self.schema['date_format']
 )
-        # Drops na values if the amount or date is missing
-        df.dropna(subset=['Date','Amount'], inplace=True)
+        # Drops na values if the amount or date or balance is missing
+        df.dropna(subset=['Date','Amount','Balance'], inplace=True)
 
         # Used to preserve intra-day transaction order from original export as resolution is 1 days but original export hold order of transactions within the day
         df.insert(0, 'Transaction Order', range(1, len(df) + 1))
@@ -118,6 +119,7 @@ class FinancialTracker:
                     selection = int(self.account_name_option)
                 except ValueError:
                     print('Invalid input please try again')
+                    logging.info('Select account - Invalid input please try again')
                     continue
 
                 # Checks if number falls within the range of existing accounts
@@ -152,7 +154,7 @@ class FinancialTracker:
             # Checks if the provided file/path exists
             if os.path.exists(self.file_path):
                 cleaned_input = self.read_and_clean(self.file_path)
-                logging.debug('file_path exists correctly')
+                logging.info('file_path exists correctly')
 
                 # Handles case where user goes back to menu rather than continues
                 result = self.select_account()
@@ -172,4 +174,5 @@ class FinancialTracker:
 
             # Fall back for invalid input
             else:
-                print('Failed file does not exist')
+                logging.info('Failed file does not exist')
+                raise IndexError('Upload file - Failed file does not exist')

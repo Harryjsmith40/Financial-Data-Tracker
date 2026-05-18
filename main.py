@@ -1,5 +1,6 @@
 from financial_visualiser import FinancialVisualiser
 from financial_tracker import FinancialTracker
+import logging
 
 def main():
 
@@ -23,6 +24,21 @@ def main():
 
         else:
             print("Invalid input please try again")
+            logging.info('Main - Invalid input please try again')
+
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+
+file_handler = logging.FileHandler('log_info.log')
+stream_handler = logging.StreamHandler()
+
+stream_handler.setLevel(logging.INFO)
+file_handler.setFormatter(formatter)
+stream_handler.setFormatter(formatter)
+
+logger.addHandler(file_handler)
+logger.addHandler(stream_handler)
 
 if __name__ == '__main__':
     main()

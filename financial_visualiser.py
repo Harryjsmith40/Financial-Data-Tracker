@@ -5,6 +5,7 @@ from matplotlib.ticker import AutoMinorLocator, AutoLocator, FuncFormatter
 import matplotlib.pyplot as plt
 import pandas as pd
 import sys
+import logging
 
 class FinancialVisualiser:
     # Defines the data types of the files and the date formatting
@@ -24,7 +25,7 @@ class FinancialVisualiser:
         filled_master = pivot_master.ffill(axis='index')
         daily_networth = filled_master.sum(axis='columns')
 
-        self.format_graph(daily_networth)
+        self.plot_graph(daily_networth)
 
     def month_formatter(self, x, pos):
         date = num2date(x)
@@ -32,7 +33,7 @@ class FinancialVisualiser:
             return date.strftime('%b \n %Y')
         return date.strftime('%b')
 
-    def format_graph(self, data):
+    def plot_graph(self, data):
         '''Configures all amount time graphs'''
         fig, ax = plt.subplots()
         ax.plot(data)
@@ -72,12 +73,8 @@ class FinancialVisualiser:
         # Converts to pivot table and sums daily transactions across all accounts into one datum
         pivot_filter_current = filtered_current.pivot_table(index='Date', columns='Account Name', values='Amount', aggfunc='sum')
         daily_transactions = pivot_filter_current.sum(axis='columns')
-        
-        ###################################################################################################################################
-        # Add a function which does the locators and formaters and finish style sheet for visuals e.g. grid lines, font, figure, colours, #
-        ###################################################################################################################################
 
-        self.format_graph(daily_transactions)
+        self.plot_graph(daily_transactions)
 
     def visualisation_options(self):
         '''Allows the user to select what they want to plot'''
@@ -85,7 +82,7 @@ class FinancialVisualiser:
         master_record = self.read_master()
         
         while True:
-            print('A Networth')
+            print('A Net Worth')
             print('B Expenses')
             print('C Income')
             print('D Back to main menu')
@@ -110,3 +107,4 @@ class FinancialVisualiser:
             
             else:
                 print('Invalid Input Please Try Again')
+                logging.info('Visualisation Options - Invalid Input Please Try Again')
