@@ -61,12 +61,18 @@ class FinancialTracker:
 
         return df
     
-    def deduplicate(self, cleaned_input):
+    @staticmethod
+    def deduplicate(cleaned_input):
         ''' Checks for and removes duplicates''' 
         master_record = DataRepository.read_master()
+        # Left merge master and input together
         merged_df = cleaned_input.merge(master_record, how='left', on=['Date', 'Amount', 'Desc', 'Balance', 'Account Name', 'Account Type'], indicator=True)
+        # Drops all but the things existing in the input only
         merged_df = merged_df[merged_df['_merge'] == 'left_only']
+        # drops the extra column that indicates the merge origins
         merged_df = merged_df.drop(labels='_merge' , axis='columns')
+        # Post merge reset as merging holds input dataframe index positions
+        merged_df = merged_df.reset_index(drop=True)
 
         return merged_df
 
