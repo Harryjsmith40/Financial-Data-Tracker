@@ -1,8 +1,11 @@
 import pandas as pd
+import pytest
+from pandera.errors import SchemaError
 
 from data_repository import DataRepository
 from financial_tracker import FinancialTracker
 from Config.config import schema
+from schema_validators import input_schema_validator
 
 master = pd.DataFrame({
     'Date': ['01/01/2024', '15/01/2024', '01/02/2024'],
@@ -86,3 +89,14 @@ def test_full_overlap(monkeypatch):
     result = FinancialTracker.deduplicate(full_overlap_input)
 
     pd.testing.assert_frame_equal(result,full_overlap_correct_result, check_dtype=False)
+
+null_df = pd.DataFrame({
+    'Date': ['01/01/2024'],
+    'Amount': [None],
+    'Desc': ['Coles'],
+    'Balance': [950.00]
+})
+
+def test_null_input_schema_validator():
+    with pytest.raises(SchemaError):
+        input_schema_validator.validate(null_df)
