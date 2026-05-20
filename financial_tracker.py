@@ -1,5 +1,6 @@
 from Config.config import schema, data_folder, master_record_path, account_info_path
 from data_repository import DataRepository
+from schema_validators import input_schema_validator
 
 import os
 import pandas as pd
@@ -42,7 +43,8 @@ class FinancialTracker:
         else:
             self.account_info = DataRepository.write_account()
 
-    def read_and_clean(self, file_path):
+    @staticmethod
+    def read_and_clean(file_path):
         '''Reads CSV files, formates dates and data types, removes null data and adds an index'''
         # Read the CSV file into a DataFrame
         df = DataRepository.read_input_CSV(file_path)
@@ -58,6 +60,8 @@ class FinancialTracker:
         
         # Drops column in order to preserve simplifed file
         df.drop(columns=['Transaction Order'], inplace=True)
+
+        df = input_schema_validator.validate(df)
 
         return df
     
