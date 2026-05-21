@@ -33,6 +33,7 @@ formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 file_handler = logging.FileHandler('log_info.log')
 stream_handler = logging.StreamHandler()
 
+
 stream_handler.setLevel(logging.INFO)
 file_handler.setFormatter(formatter)
 stream_handler.setFormatter(formatter)
