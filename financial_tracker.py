@@ -164,7 +164,7 @@ class FinancialTracker:
                 deduplicated_input = self.deduplicate(cleaned_input)
                 
                 # Writes the uploaded file to the master record
-                DataRepository.to_master(deduplicated_input)
+                DataRepository.append_master(deduplicated_input)
 
             # Raises issue if file doesn't exist
             else:
