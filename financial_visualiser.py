@@ -1,6 +1,7 @@
 from Config.config import schema, data_folder, master_record_path, account_info_path
 from matplotlib.dates import DateFormatter as DF, WeekdayLocator as WL, MonthLocator as MnL, DayLocator as DL, num2date
 from matplotlib.ticker import AutoMinorLocator, AutoLocator, FuncFormatter
+from data_repository import DataRepository
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -10,12 +11,6 @@ import logging
 class FinancialVisualiser:
     # Defines the data types of the files and the date formatting
     schema = schema
-
-    def read_master(self):
-        '''Reads the master file'''
-        master_record = pd.read_csv(master_record_path, dtype=self.schema['dtypes'], parse_dates=self.schema['date_columns'], date_format=self.schema['date_format']
-)
-        return master_record
 
     def networth_plot(self, master_record):
         '''Displays a graph of networth over time'''
@@ -86,7 +81,7 @@ class FinancialVisualiser:
     def visualisation_options(self):
         '''Allows the user to select what they want to plot'''
         
-        master_record = self.read_master()
+        master_record = DataRepository.read_master()
         
         while True:
             print('A Net Worth')
