@@ -12,9 +12,10 @@ class FinancialVisualiser:
     # Defines the data types of the files and the date formatting
     schema = schema
 
-    def networth_plot(self, master_record):
+    def net_worth_plot(self, master_record):
         '''Displays a graph of networth over time'''
 
+        title='Net Worth'
         # Prepares data for plotting by converting the table to a pivot table
         # Aligns axis for plotting Index = Date, columns='Account Name', values='Balance'
         # aggfunc=last - Keepings the last entry if multiple on the same date (this lines up with the way the input CSV is formatted from CommBank)
@@ -27,7 +28,7 @@ class FinancialVisualiser:
         # in order to get the Total balance per dayor net worth on a given day
         daily_networth = filled_master.sum(axis='columns')
 
-        self.plot_graph(daily_networth)
+        self.plot_graph(daily_networth, title)
 
     def month_formatter(self, x, pos):
         date = num2date(x)
@@ -35,7 +36,7 @@ class FinancialVisualiser:
             return date.strftime('%b \n %Y')
         return date.strftime('%b')
 
-    def plot_graph(self, data):
+    def plot_graph(self, data, title):
         '''Configures all amount time graphs'''
         fig, ax = plt.subplots()
         ax.plot(data)
@@ -53,6 +54,14 @@ class FinancialVisualiser:
         ax.yaxis.set_major_locator(AutoLocator())
         ax.yaxis.set_major_formatter(self.schema['minor_currency_format'])
 
+        # applies style sheet
+        plt.style.use('Config/amount_over_date.mplstyle')
+
+        # sets titles
+        ax.set_title(title)
+        ax.set_xlabel('Date')
+        ax.set_ylabel('Amount')
+
         plt.grid()
         plt.show()
 
@@ -63,9 +72,11 @@ class FinancialVisualiser:
         # Filters for the master record to expenses or income based on choice
         if transaction_type == 'Expenses':
             filtered_current = master_record[master_record['Amount'] < 0]
+            title = 'Expenses'
 
         elif transaction_type == 'Income':
             filtered_current = master_record[master_record['Amount'] > 0]
+            title = 'Income'
         
         # Filters out transfer to and froms within the same online banking account (internal transfers)
         # Potential Data Error - So far data shows xx\d{4} for internal transfers only and names for all externals
@@ -76,7 +87,7 @@ class FinancialVisualiser:
         pivot_filter_current = filtered_current.pivot_table(index='Date', columns='Account Name', values='Amount', aggfunc='sum')
         daily_transactions = pivot_filter_current.sum(axis='columns')
 
-        self.plot_graph(daily_transactions)
+        self.plot_graph(daily_transactions, title)
 
     def visualisation_options(self):
         '''Allows the user to select what they want to plot'''
@@ -93,7 +104,7 @@ class FinancialVisualiser:
             plot_option = input('Please provide the letter of the plot you would like to make: ')
 
             if plot_option.upper() == 'A':
-                self.networth_plot(master_record)
+                self.net_worth_plot(master_record)
 
             elif plot_option.upper() == 'B':
                 self.spending_or_income_plot(master_record, 'Expenses')

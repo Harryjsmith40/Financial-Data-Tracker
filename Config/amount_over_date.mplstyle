@@ -1,0 +1,38 @@
+# Figure
+figure.figsize: 12, 6
+figure.dpi: 150
+
+# Background
+axes.facecolor: ffffff
+figure.facecolor: ffffff
+
+# Grid
+axes.grid: True
+grid.color: cccccc
+grid.linewidth: 0.5
+grid.linestyle: --
+axes.axisbelow: True
+
+# Lines
+lines.linewidth: 2.0
+lines.color: 2196F3
+
+# Axes
+axes.spines.top: False
+axes.spines.right: False
+axes.linewidth: 0.8
+axes.edgecolor: 888888
+
+# Ticks
+xtick.labelsize: 9
+ytick.labelsize: 9
+xtick.color: 444444
+ytick.color: 444444
+
+# Font
+font.family: sans-serif
+font.size: 10
+
+# Legend
+legend.frameon: False
+legend.fontsize: 9
