@@ -45,7 +45,7 @@ flowchart TD
 
     H --> J1[Filter Expenses]
     I --> J2[Filter Income]
-    J1 --> J2[⚠️ Mask Internal Transfers\nTransfer xx\d4 - potential data error]
+    J1 --> J2[⚠️ Known Issue ⚠️ Current internal transfers will show towards income and expenses in the data]
     J2 --> J3[Pivot Table\naggfunc=sum]
     J3 --> J4[Sum across accounts]
     J4 --> PLOT
@@ -53,14 +53,13 @@ flowchart TD
     C --> C1{CSV Filename?}
     C1 --> B
     C1 --> C2[Build File Path]
-    C2 --> C3{File Exists?}
-    C3 -->|Yes| C5[Clean Data\n⚠️ Transaction Order column unused]
+    C2 --> C3[File Exists?]
+    C3 -->|Yes| C5[⚠️ Clean Data ⚠️ Transaction Order column unused]
     C5 --> C6[Select Account]
     C6 --> C7[Deduplicate\nLeft merge with master]
     C7 --> C8[Append to Master Record]
     C8 --> B
-    C3 -->|No| C4[⚠️ Raises IndexError\nNeeds proper error handling]
-    C4 --> C1
+    C3 -->|No| C1
 ```
 
 ## The Problem
