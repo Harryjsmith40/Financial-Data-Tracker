@@ -14,14 +14,14 @@ class DataRepository():
         return master_record
 
     @staticmethod
-    def to_master(df):
+    def append_master(df):
         '''Updates master_record.csv to include new data'''
         # Appends to master_record.csv the new data
         df.to_csv(master_record_path, mode='a', header=False, index=False, date_format=schema['date_format'])
         logging.info('Successfully appended to master')
 
     @staticmethod
-    def write_master(master_record):
+    def create_master(master_record):
         master_record.to_csv(master_record_path, index=False)
         logging.info('Successfully writen to master')
 

@@ -28,10 +28,10 @@ class FinancialTracker:
         else:
             master_record = pd.DataFrame(columns=['Date', 'Amount', 'Desc', 'Balance', 'Account Name', 'Account Type'])
             if os.path.exists(data_folder):
-                DataRepository.write_master(master_record)
+                DataRepository.create_master(master_record)
             else:
                 os.mkdir(data_folder)
-                DataRepository.write_master(master_record)
+                DataRepository.create_master(master_record)
 
         # Checks to see if the accounts CSV exists
         if os.path.exists(account_info_path):
