@@ -28,11 +28,12 @@ def main():
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
+logging.getLogger('matplotlib').setLevel(logging.WARNING)
+
 formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 
 file_handler = logging.FileHandler('log_info.log')
 stream_handler = logging.StreamHandler()
-
 
 stream_handler.setLevel(logging.INFO)
 file_handler.setFormatter(formatter)
