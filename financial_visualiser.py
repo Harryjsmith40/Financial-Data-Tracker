@@ -78,10 +78,7 @@ class FinancialVisualiser:
             filtered_current = master_record[master_record['Amount'] > 0]
             title = 'Income'
         
-        # Filters out transfer to and froms within the same online banking account (internal transfers)
-        # Potential Data Error - So far data shows xx\d{4} for internal transfers only and names for all externals
-        mask = filtered_current['Desc'].str.contains(r'Transfer.*xx\d{4}', case=False, na=False)
-        filtered_current= filtered_current[~mask]
+        # Known Issue - Current internal transfers will show towards income and expenses in the data
 
         # Converts to pivot table for plotting and sums daily transactions across all accounts into one datum
         pivot_filter_current = filtered_current.pivot_table(index='Date', columns='Account Name', values='Amount', aggfunc='sum')
