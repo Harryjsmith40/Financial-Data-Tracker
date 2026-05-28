@@ -5,7 +5,7 @@ from pandera.errors import SchemaError
 from data_repository import DataRepository
 from financial_tracker import FinancialTracker
 from Config.config import schema
-from schema_validators import input_schema_validator
+from schema_validators import input_schema_validator, master_record_validator
 
 master = pd.DataFrame({
     'Date': ['01/01/2024', '15/01/2024', '01/02/2024'],
@@ -100,3 +100,7 @@ null_df = pd.DataFrame({
 def test_null_input_schema_validator():
     with pytest.raises(SchemaError):
         input_schema_validator.validate(null_df)
+
+def test_master_schema_validator():
+    with pytest.raises(SchemaError):
+        master_record_validator(master)
