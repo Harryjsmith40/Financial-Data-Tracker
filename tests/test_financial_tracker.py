@@ -100,3 +100,7 @@ null_df = pd.DataFrame({
 def test_null_input_schema_validator():
     with pytest.raises(SchemaError):
         input_schema_validator.validate(null_df)
+
+def test_master_schema_validator():
+    with pytest.raises(SchemaError):
+        test_master_schema_validator(master)
