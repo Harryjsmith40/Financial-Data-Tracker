@@ -113,4 +113,4 @@ accounts_df = pd.DataFrame({
 
 def test_accounts_schema_validator():
     with pytest.raises(SchemaError):
-        accounts_validator()
+        accounts_validator(accounts_df)
