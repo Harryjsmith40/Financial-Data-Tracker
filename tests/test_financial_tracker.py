@@ -9,9 +9,9 @@ from schema_validators import input_schema_validator
 
 master = pd.DataFrame({
     'Date': ['01/01/2024', '15/01/2024', '01/02/2024'],
-    'Amount': [-50.00, 100.00, -30.00],
+    'Amount': [-5000, 10000, -3000],
     'Desc': ['Coles', 'Salary', 'Netflix'],
-    'Balance': [950.00, 1050.00, 1020.00],
+    'Balance': [95000, 105000, 102000],
     'Account Name': ['CommBank', 'CommBank', 'CommBank'],
     'Account Type': ['Current', 'Current', 'Current']
 }).astype(schema['dtypes'])
@@ -19,9 +19,9 @@ master = pd.DataFrame({
 # Overlaps with master on Feb, new data in March
 partial_overlap_input = pd.DataFrame({
     'Date': ['01/02/2024', '15/03/2024'],
-    'Amount': [-30.00, -80.00],
+    'Amount': [-3000, -8000],
     'Desc': ['Netflix', 'Rent'],
-    'Balance': [1020.00, 940.00],
+    'Balance': [102000, 94000],
     'Account Name': ['CommBank', 'CommBank'],
     'Account Type': ['Current', 'Current']
 }).astype(schema['dtypes'])
@@ -29,9 +29,9 @@ partial_overlap_input = pd.DataFrame({
 # Expected result for partial overlap
 partial_overlap_correct_result = pd.DataFrame({
     'Date': ['15/03/2024'],
-    'Amount': [-80.00],
+    'Amount': [-8000],
     'Desc': ['Rent'],
-    'Balance': [940.00],
+    'Balance': [94000],
     'Account Name': ['CommBank'],
     'Account Type': ['Current']
 }).astype(schema['dtypes'])
@@ -39,9 +39,9 @@ partial_overlap_correct_result = pd.DataFrame({
 # Entirely new data
 no_overlap_input = pd.DataFrame({
     'Date': ['01/04/2024'],
-    'Amount': [-20.00],
+    'Amount': [-2000],
     'Desc': ['Spotify'],
-    'Balance': [920.00],
+    'Balance': [92000],
     'Account Name': ['CommBank'],
     'Account Type': ['Current']
 }).astype(schema['dtypes'])
@@ -49,9 +49,9 @@ no_overlap_input = pd.DataFrame({
 # Expected result for no overlap
 no_overlap_correct_result = pd.DataFrame({
     'Date': ['01/04/2024'],
-    'Amount': [-20.00],
+    'Amount': [-2000],
     'Desc': ['Spotify'],
-    'Balance': [920.00],
+    'Balance': [92000],
     'Account Name': ['CommBank'],
     'Account Type': ['Current']
 }).astype(schema['dtypes'])
@@ -94,7 +94,7 @@ null_df = pd.DataFrame({
     'Date': ['01/01/2024'],
     'Amount': [None],
     'Desc': ['Coles'],
-    'Balance': [950.00]
+    'Balance': [95000]
 })
 
 def test_null_input_schema_validator():

@@ -5,6 +5,7 @@ from schema_validators import input_schema_validator
 import os
 import pandas as pd
 import logging
+from decimal import Decimal
 
 class FinancialTracker:
     '''A finnacial tracker designed to help make inform make data based decisions'''    
@@ -48,9 +49,12 @@ class FinancialTracker:
         '''Reads CSV files, formates dates and data types, removes null data and adds an index'''
         # Read the CSV file into a DataFrame
         df = DataRepository.read_input_CSV(file_path)
-
         # Drops na values if the amount or date or balance is missing
         df.dropna(subset=['Date','Amount','Balance'], inplace=True)
+
+        # Converts columns to pence based logic to avoid floating point errors
+        df['Balance'] = df['Balance'].apply(lambda x: int(Decimal(str(x)) * 100))
+        df['Amount'] = df['Amount'].apply(lambda x: int(Decimal(str(x)) * 100))
 
         # Used to preserve intra-day transaction order from original export as resolution is 1 days but original export hold order of transactions within the day
         df.insert(0, 'Transaction Order', range(1, len(df) + 1))
