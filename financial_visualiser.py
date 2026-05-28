@@ -28,7 +28,9 @@ class FinancialVisualiser:
         # in order to get the Total balance per dayor net worth on a given day
         daily_networth = filled_master.sum(axis='columns')
 
-        self.plot_graph(daily_networth, title)
+        daily_networth_unit_currency = FinancialVisualiser.convert_to_unit_currency(daily_networth)
+
+        self.plot_graph(daily_networth_unit_currency, title)
 
     def month_formatter(self, x, pos):
         date = num2date(x)
@@ -84,7 +86,9 @@ class FinancialVisualiser:
         pivot_filter_current = filtered_current.pivot_table(index='Date', columns='Account Name', values='Amount', aggfunc='sum')
         daily_transactions = pivot_filter_current.sum(axis='columns')
 
-        self.plot_graph(daily_transactions, title)
+        daily_transactions_unit_currency = FinancialVisualiser.convert_to_unit_currency(daily_transactions)
+
+        self.plot_graph(daily_transactions_unit_currency, title)
 
     def visualisation_options(self):
         '''Allows the user to select what they want to plot'''
@@ -118,3 +122,8 @@ class FinancialVisualiser:
             else:
                 print('Invalid Input Please Try Again')
                 logging.info('Visualisation Options - Invalid Input Please Try Again')
+
+        @staticmethod
+        def convert_to_unit_currency(data):
+            '''Converts back to unit currency for plotting'''
+            return data / 100
