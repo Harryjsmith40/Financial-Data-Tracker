@@ -21,3 +21,11 @@ master_record_validator = pa.DataFrameSchema(
         'Account Type': pa.Column(str)
     }
 )
+
+accounts_validator = pa.DataFrameSchema(
+    {
+        'Account Name': pa.Column(str),
+        'Account Type': pa.Column(str),
+        'Last Updated': pa.Column(pa.DateTime)
+    }
+)
