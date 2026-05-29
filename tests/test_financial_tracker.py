@@ -71,7 +71,7 @@ full_overlap_correct_result = pd.DataFrame({
 
 def test_partial_overlap(monkeypatch):
     monkeypatch.setattr(DataRepository, 'read_master', lambda *args, **kwargs: master)
-    
+    print(DataRepository.read_master())
     result = FinancialTracker.deduplicate(partial_overlap_input)
 
     pd.testing.assert_frame_equal(result,partial_overlap_correct_result)
@@ -101,7 +101,7 @@ def test_null_input_schema_validator():
     with pytest.raises(SchemaError):
         input_schema_validator.validate(null_df)
 
-master = pd.DataFrame({
+master_schema = pd.DataFrame({
     'Date': ['01/01/2024', '15/01/2024', '01/02/2024'],
     'Amount': [-50.00, 100.00, -30.00],
     'Desc': ['Coles', 'Salary', 'Netflix'],
@@ -112,7 +112,7 @@ master = pd.DataFrame({
 
 def test_master_schema_validator():
     with pytest.raises(SchemaError):
-        master_record_validator.validate(master)
+        master_record_validator.validate(master_schema)
 
 accounts_df = pd.DataFrame({
         'Account Name': [None],
