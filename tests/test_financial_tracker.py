@@ -67,7 +67,7 @@ full_overlap_correct_result = pd.DataFrame({
     'Balance': [],
     'Account Name': [],
     'Account Type': []
-})
+}).astype(schema['dtypes'])
 
 def test_partial_overlap(monkeypatch):
     monkeypatch.setattr(DataRepository, 'read_master', lambda: master)
@@ -101,9 +101,18 @@ def test_null_input_schema_validator():
     with pytest.raises(SchemaError):
         input_schema_validator.validate(null_df)
 
+master = pd.DataFrame({
+    'Date': ['01/01/2024', '15/01/2024', '01/02/2024'],
+    'Amount': [-50.00, 100.00, -30.00],
+    'Desc': ['Coles', 'Salary', 'Netflix'],
+    'Balance': [950.00, 1050.00, 1020.00],
+    'Account Name': ['CommBank', 'CommBank', 'CommBank'],
+    'Account Type': ['Current', 'Current', 'Current']
+}).astype(schema['dtypes'])
+
 def test_master_schema_validator():
     with pytest.raises(SchemaError):
-        master_record_validator(master)
+        master_record_validator.validate(master)
 
 accounts_df = pd.DataFrame({
         'Account Name': [None],
@@ -113,4 +122,29 @@ accounts_df = pd.DataFrame({
 
 def test_accounts_schema_validator():
     with pytest.raises(SchemaError):
-        accounts_validator(accounts_df)
+        accounts_validator.validate(accounts_df)
+
+# Read and Clean Testing
+# Tests null in all columns where they need to be dropped and tests correct pence conversion
+read_and_clean_input = pd.DataFrame({
+    'Date': ['01/02/2024', '15/03/2024','30/01/2024',None],
+    'Amount': [-30.00, -80.00, None,50.00],
+    'Desc': ['Netflix', 'Rent','Error','Haircut'],
+    'Balance': [1020.00, None, 26.75, 94.16],
+})
+
+read_and_clean_result = pd.DataFrame({
+    'Date': ['01/02/2024'],
+    'Amount': [-3000],
+    'Desc': ['Netflix'],
+    'Balance': [102000],
+})
+
+read_and_clean_result['Date'] = pd.to_datetime(read_and_clean_result['Date'], format='%d/%m/%Y')
+
+def test_read_and_clean(monkeypatch):
+    monkeypatch.setattr(DataRepository, 'read_input_CSV', lambda file_path: read_and_clean_input)
+    
+    result = FinancialTracker.read_and_clean('dummy_path.csv')
+
+    pd.testing.assert_frame_equal(result,read_and_clean_result, check_dtype=True)
