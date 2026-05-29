@@ -133,7 +133,7 @@ read_and_clean_input = pd.DataFrame({
     'Balance': [1020.00, None, 26.75, 94.16],
 })
 
-read_and_clean_input['Date'] = pd.to_datetime(read_and_clean_input['Date'], format='%d/%m/%Y')s
+read_and_clean_input['Date'] = pd.to_datetime(read_and_clean_input['Date'], format='%d/%m/%Y')
 
 read_and_clean_result = pd.DataFrame({
     'Date': ['01/02/2024'],
