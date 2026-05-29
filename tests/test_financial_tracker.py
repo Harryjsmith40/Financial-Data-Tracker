@@ -70,21 +70,21 @@ full_overlap_correct_result = pd.DataFrame({
 }).astype(schema['dtypes'])
 
 def test_partial_overlap(monkeypatch):
-    monkeypatch.setattr(DataRepository, 'read_master', lambda: master)
+    monkeypatch.setattr(DataRepository, 'read_master', lambda *args, **kwargs: master)
     
     result = FinancialTracker.deduplicate(partial_overlap_input)
 
     pd.testing.assert_frame_equal(result,partial_overlap_correct_result)
 
 def test_no_overlap(monkeypatch):
-    monkeypatch.setattr(DataRepository, 'read_master', lambda: master)
+    monkeypatch.setattr(DataRepository, 'read_master', lambda *args, **kwargs: master)
 
     result = FinancialTracker.deduplicate(no_overlap_input)
 
     pd.testing.assert_frame_equal(result,no_overlap_correct_result)
 
 def test_full_overlap(monkeypatch):
-    monkeypatch.setattr(DataRepository, 'read_master', lambda: master)
+    monkeypatch.setattr(DataRepository, 'read_master', lambda *args, **kwargs: master)
     
     result = FinancialTracker.deduplicate(full_overlap_input)
 
@@ -132,6 +132,8 @@ read_and_clean_input = pd.DataFrame({
     'Desc': ['Netflix', 'Rent','Error','Haircut'],
     'Balance': [1020.00, None, 26.75, 94.16],
 })
+
+read_and_clean_input['Date'] = pd.to_datetime(read_and_clean_input['Date'], format='%d/%m/%Y')s
 
 read_and_clean_result = pd.DataFrame({
     'Date': ['01/02/2024'],
