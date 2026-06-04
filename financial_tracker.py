@@ -1,19 +1,23 @@
-from Config.config import schema, data_folder, master_record_path, account_info_path
+from Config.config import data_folder, master_record_path, account_info_path
 from data_repository import DataRepository
 from schema_validators import input_schema_validator
+from financial_base import FinancialBase
 
 import os
 import pandas as pd
 import logging
 from decimal import Decimal
 
-class FinancialTracker:
+class FinancialTracker(FinancialBase):
     '''A finnacial tracker designed to help make inform make data based decisions'''    
-    # Defines the data types of the files and the date formatting
-    schema = schema
 
     def __init__(self):
         '''Initialises the master record and accounts CSVs'''
+
+        # Inherits the schema from the base class, FinancialBase
+        super().__init__()
+
+
         # Checking if the master file exists
         # Currently assumes ./Data/ exists if the user doesn't have ./Data/master_record.csv 
         if os.path.exists(master_record_path):
