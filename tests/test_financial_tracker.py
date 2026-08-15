@@ -148,7 +148,7 @@ read_and_clean_result = pd.DataFrame({
 read_and_clean_result['Date'] = pd.to_datetime(read_and_clean_result['Date'], format='%d/%m/%Y')
 
 def test_read_and_clean(monkeypatch):
-    monkeypatch.setattr(DataRepository, 'read_input_CSV', lambda self, file_path: read_and_clean_input)
+    monkeypatch.setattr(DataRepository, 'read_input_CSV', lambda *args, **kwargs: read_and_clean_input)
     
     result = tracker.read_and_clean('dummy_path.csv')
 
