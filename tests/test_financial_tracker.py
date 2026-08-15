@@ -7,6 +7,9 @@ from financial_tracker import FinancialTracker
 from Config.config import schema
 from schema_validators import input_schema_validator, master_record_validator, accounts_validator
 
+repo = DataRepository()
+tracker = FinancialTracker(repo)
+
 master = pd.DataFrame({
     'Date': ['01/01/2024', '15/01/2024', '01/02/2024'],
     'Amount': [-5000, 10000, -3000],
@@ -72,21 +75,21 @@ full_overlap_correct_result = pd.DataFrame({
 def test_partial_overlap(monkeypatch):
     monkeypatch.setattr(DataRepository, 'read_master', lambda *args, **kwargs: master)
     print(DataRepository.read_master())
-    result = FinancialTracker.deduplicate(partial_overlap_input)
+    result = tracker.deduplicate(partial_overlap_input)
 
     pd.testing.assert_frame_equal(result,partial_overlap_correct_result)
 
 def test_no_overlap(monkeypatch):
     monkeypatch.setattr(DataRepository, 'read_master', lambda *args, **kwargs: master)
 
-    result = FinancialTracker.deduplicate(no_overlap_input)
+    result = tracker.deduplicate(no_overlap_input)
 
     pd.testing.assert_frame_equal(result,no_overlap_correct_result)
 
 def test_full_overlap(monkeypatch):
     monkeypatch.setattr(DataRepository, 'read_master', lambda *args, **kwargs: master)
     
-    result = FinancialTracker.deduplicate(full_overlap_input)
+    result = tracker.deduplicate(full_overlap_input)
 
     pd.testing.assert_frame_equal(result,full_overlap_correct_result, check_dtype=False)
 
@@ -145,8 +148,8 @@ read_and_clean_result = pd.DataFrame({
 read_and_clean_result['Date'] = pd.to_datetime(read_and_clean_result['Date'], format='%d/%m/%Y')
 
 def test_read_and_clean(monkeypatch):
-    monkeypatch.setattr(DataRepository, 'read_input_CSV', lambda file_path: read_and_clean_input)
+    monkeypatch.setattr(DataRepository, 'read_input_CSV', lambda self, file_path: read_and_clean_input)
     
-    result = FinancialTracker.read_and_clean('dummy_path.csv')
+    result = tracker.read_and_clean('dummy_path.csv')
 
     pd.testing.assert_frame_equal(result,read_and_clean_result, check_dtype=True)
