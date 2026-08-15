@@ -1,5 +1,7 @@
-class FinancialBase():
-    schema = {
+class FinancialBase:
+    def __init__(self, repo):
+        self.repo = repo
+        self.schema = {
         'dtypes': {'Amount': float, 'Desc': str, 'Balance': float, 'Account Name': str, 'Account Type': str},
         'input_dtypes': {'Amount': float, 'Desc': str, 'Balance': float},
         'date_columns': ['Date'],

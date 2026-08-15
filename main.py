@@ -1,8 +1,13 @@
 from financial_visualiser import FinancialVisualiser
 from financial_tracker import FinancialTracker
+from data_repository import DataRepository
 import logging
 
 def main():
+    # Creates a single instance of DataRepository, then uses direct injection to call the methods
+    # This is done to mitigate the risk of more than one instance once the database is established
+
+    repo = DataRepository()
 
     # Allows user to select what they want to do
     while True:
@@ -12,11 +17,11 @@ def main():
         upload_or_visualise = input('Please select an option from the list (A/B/C): ')
 
         if upload_or_visualise.upper() == "A":
-            tracker = FinancialTracker()
+            tracker = FinancialTracker(repo)
             tracker.upload_file()
 
         elif upload_or_visualise.upper() == "B":
-            visualiser = FinancialVisualiser()
+            visualiser = FinancialVisualiser(repo)
             visualiser.visualisation_options()
 
         elif upload_or_visualise.upper() == "C":

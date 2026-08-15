@@ -12,9 +12,9 @@ import logging
 class FinancialVisualiser(FinancialBase):
     # Defines the data types of the files and the date formatting
 
-    def __init__():
+    def __init__(self, repo):
         # Inherits the schema from the base class, FinancialBase
-        super().__init__()
+        super().__init__(repo)
 
     def net_worth_plot(self, master_record):
         '''Displays a graph of networth over time'''
@@ -97,7 +97,7 @@ class FinancialVisualiser(FinancialBase):
     def visualisation_options(self):
         '''Allows the user to select what they want to plot'''
         
-        master_record = DataRepository.read_master()
+        master_record = self.repo.read_master()
         
         while True:
             print('A Net Worth')
@@ -127,7 +127,7 @@ class FinancialVisualiser(FinancialBase):
                 print('Invalid Input Please Try Again')
                 logging.info('Visualisation Options - Invalid Input Please Try Again')
 
-        @staticmethod
-        def convert_to_unit_currency(data):
-            '''Converts back to unit currency for plotting'''
-            return data / 100
+    @staticmethod
+    def convert_to_unit_currency(data):
+        '''Converts back to unit currency for plotting'''
+        return data / 100
