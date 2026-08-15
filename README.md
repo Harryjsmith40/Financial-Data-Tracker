@@ -93,9 +93,14 @@ The basic program
 * 1.1 Track and visualises networth, spending and income *(Developed After 1.2)*
 
 ### Stage 2:
+Increase usability by reducing user friction points
+* 2 Use Bank APIs in order to automatically pull then clean data
+* 2.1 Create user interface
+
+### Stage 3:
 Machine learning / artifical intelligence categorisation
-* 2 Train a model in order to categorise transactions automatically if confidence score is below X% flag for manual review, if confidence score is below X% do not categorise and ask for manual review
-* 2.1 Use new categories to increase data visualisation details 
+* 3 Train a model in order to categorise transactions automatically if confidence score is below X% flag for manual review, if confidence score is below X% do not categorise and ask for manual review
+* 3.1 Use new categories to increase data visualisation details 
 
 ## Skills 
 

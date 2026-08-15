@@ -1,5 +1,4 @@
 from Config.config import data_folder, master_record_path, account_info_path
-from data_repository import DataRepository
 from schema_validators import input_schema_validator
 from financial_base import FinancialBase
 
@@ -11,18 +10,18 @@ from decimal import Decimal
 class FinancialTracker(FinancialBase):
     '''A finnacial tracker designed to help make inform make data based decisions'''    
 
-    def __init__(self):
+    def __init__(self, repo):
         '''Initialises the master record and accounts CSVs'''
 
         # Inherits the schema from the base class, FinancialBase
-        super().__init__()
+        super().__init__(repo)
 
 
         # Checking if the master file exists
         # Currently assumes ./Data/ exists if the user doesn't have ./Data/master_record.csv 
         if os.path.exists(master_record_path):
             # Checks structure of file is correct
-            master_record = DataRepository.read_master()
+            master_record = repo.read_master()
             if master_record.columns.tolist() == ['Date', 'Amount', 'Desc', 'Balance', 'Account Name', 'Account Type']:
                 logging.info('master_record initialised correctly')
             else: 
@@ -33,26 +32,25 @@ class FinancialTracker(FinancialBase):
         else:
             master_record = pd.DataFrame(columns=['Date', 'Amount', 'Desc', 'Balance', 'Account Name', 'Account Type'])
             if os.path.exists(data_folder):
-                DataRepository.create_master(master_record)
+                repo.create_master(master_record)
             else:
                 os.mkdir(data_folder)
-                DataRepository.create_master(master_record)
+                repo.create_master(master_record)
 
         # Checks to see if the accounts CSV exists
         if os.path.exists(account_info_path):
-            self.account_info = DataRepository.read_account()
+            self.account_info = repo.read_account()
             if self.account_info.columns.tolist() == ['Account Name', 'Account Type', 'Last Updated']:
                 logging.info('account_info initialised correctly')
 
         # Creates the account CSV if it doesn't
         else:
-            self.account_info = DataRepository.write_account()
+            self.account_info = repo.write_account()
 
-    @staticmethod
-    def read_and_clean(file_path):
+    def read_and_clean(self, file_path):
         '''Reads CSV files, formates dates and data types, removes null data and adds an index'''
         # Read the CSV file into a DataFrame
-        df = DataRepository.read_input_CSV(file_path)
+        df = self.repo.read_input_CSV(file_path)
         # Drops na values if the amount or date or balance is missing
         df.dropna(subset=['Date','Amount','Balance'], inplace=True)
 
@@ -73,10 +71,9 @@ class FinancialTracker(FinancialBase):
 
         return df
     
-    @staticmethod
-    def deduplicate(cleaned_input):
+    def deduplicate(self, cleaned_input):
         ''' Checks for and removes duplicates''' 
-        master_record = DataRepository.read_master()
+        master_record = self.repo.read_master()
         # Left merge master and input together
         merged_df = cleaned_input.merge(master_record, how='left', on=['Date', 'Amount', 'Desc', 'Balance', 'Account Name', 'Account Type'], indicator=True)
         # Drops all but the things existing in the input only
@@ -105,7 +102,7 @@ class FinancialTracker(FinancialBase):
                 account_name = input('Please provide the name of the account this data is from: ')
                 account_type = input('Please provide the type of this account (e.g. current, savings, credit card): ')
 
-                DataRepository.create_account(account_name, account_type)
+                self.repo.create_account(account_name, account_type)
 
                 return account_name, account_type
             
@@ -124,13 +121,13 @@ class FinancialTracker(FinancialBase):
 
                 # Checks if number falls within the range of existing accounts
                 if selection < len(self.account_info):
-                    account_info = DataRepository.read_account()
+                    account_info = self.repo.read_account()
                     # Reads the account details and returns them
                     account_name = account_info.loc[selection, 'Account Name']
                     account_type = account_info.loc[selection, 'Account Type']
 
                     # Updates the timestamp of the account updated to
-                    DataRepository.update_timestamp(selection, account_info)
+                    self.repo.update_timestamp(selection, account_info)
 
                     return account_name, account_type
 
@@ -172,7 +169,7 @@ class FinancialTracker(FinancialBase):
                 deduplicated_input = self.deduplicate(cleaned_input)
                 
                 # Writes the uploaded file to the master record
-                DataRepository.append_master(deduplicated_input)
+                self.repo.append_master(deduplicated_input)
 
             # Raises issue if file doesn't exist
             else:
