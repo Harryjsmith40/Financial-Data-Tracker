@@ -1,4 +1,4 @@
-from Config.config import data_folder, master_record_path, account_info_path
+from Config.config import data_folder
 from schema_validators import input_schema_validator
 from financial_base import FinancialBase
 

@@ -1,11 +1,11 @@
-from Config.config import master_record_path, account_info_path, schema
+from Config.config import schema
 from financial_base import FinancialBase
 
 import logging
 import pandas as pd
 import duckdb
 
-class DataRepository(FinancialBase):
+class DataRepository:
     '''Handles all data file interactions - while class is not strictly needed at this stage is exists for when a DB is implemented'''
     def __init__(self):
         self.con = duckdb.connect("Data/data_base.db")
@@ -42,7 +42,7 @@ class DataRepository(FinancialBase):
         if not self._table_exists('accounts'):
             self.con.execute("CREATE SEQUENCE accounts_id_sequence START 1; CREATE TABLE accounts (\"account_id\" INTEGER PRIMARY KEY DEFAULT nextval('accounts_id_sequence'),\"account_name\" VARCHAR,\"account_type\" VARCHAR,\"last_updated\" TIMESTAMP);")
         if not self._table_exists('master'):
-            self.con.execute("CREATE SEQUENCE master_id_sequence START 1; CREATE TABLE master (\"master_id\" INTEGER PRIMARY KEY DEFAULT nextval('accounts_id_sequence'),\"date\" TIMESTAMP, \"amount\" INTEGER,\"desc\" VARCHAR,\"balance\" INTEGER,\"account_name\" VARCHAR,\"account_type\" VARCHAR)")
+            self.con.execute("CREATE SEQUENCE master_id_sequence START 1; CREATE TABLE master (\"master_id\" INTEGER PRIMARY KEY DEFAULT nextval('master_id_sequence'),\"date\" TIMESTAMP, \"amount\" INTEGER,\"desc\" VARCHAR,\"balance\" INTEGER,\"account_name\" VARCHAR,\"account_type\" VARCHAR)")
 
     def _table_exists(self, table_name):
         # Checks that the table exists via the database

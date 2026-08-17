@@ -1,7 +1,6 @@
-from Config.config import data_folder, master_record_path, account_info_path
+from Config.config import data_folder
 from matplotlib.dates import DateFormatter as DF, WeekdayLocator as WL, MonthLocator as MnL, DayLocator as DL, num2date
 from matplotlib.ticker import AutoMinorLocator, AutoLocator, FuncFormatter
-from data_repository import DataRepository
 from financial_base import FinancialBase
 
 import matplotlib.pyplot as plt
@@ -87,7 +86,7 @@ class FinancialVisualiser(FinancialBase):
         # Known Issue - Current internal transfers will show towards income and expenses in the data
 
         # Converts to pivot table for plotting and sums daily transactions across all accounts into one datum
-        pivot_filter_current = filtered_current.pivot_table(index='Date', columns='Account Name', values='Amount', aggfunc='sum')
+        pivot_filter_current = filtered_current.pivot_table(index='date', columns='account_name', values='amount', aggfunc='sum')
         daily_transactions = pivot_filter_current.sum(axis='columns')
 
         daily_transactions_unit_currency = FinancialVisualiser.convert_to_unit_currency(daily_transactions)
