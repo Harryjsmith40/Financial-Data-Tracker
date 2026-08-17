@@ -11,52 +11,52 @@ repo = DataRepository()
 tracker = FinancialTracker(repo)
 
 master = pd.DataFrame({
-    'Date': ['01/01/2024', '15/01/2024', '01/02/2024'],
-    'Amount': [-5000, 10000, -3000],
-    'Desc': ['Coles', 'Salary', 'Netflix'],
-    'Balance': [95000, 105000, 102000],
-    'Account Name': ['CommBank', 'CommBank', 'CommBank'],
-    'Account Type': ['Current', 'Current', 'Current']
+    'date': ['01/01/2024', '15/01/2024', '01/02/2024'],
+    'amount': [-5000, 10000, -3000],
+    'desc': ['Coles', 'Salary', 'Netflix'],
+    'balance': [95000, 105000, 102000],
+    'account_name': ['CommBank', 'CommBank', 'CommBank'],
+    'account_type': ['Current', 'Current', 'Current']
 }).astype(schema['dtypes'])
 
 # Overlaps with master on Feb, new data in March
 partial_overlap_input = pd.DataFrame({
-    'Date': ['01/02/2024', '15/03/2024'],
-    'Amount': [-3000, -8000],
-    'Desc': ['Netflix', 'Rent'],
-    'Balance': [102000, 94000],
-    'Account Name': ['CommBank', 'CommBank'],
-    'Account Type': ['Current', 'Current']
+    'date': ['01/02/2024', '15/03/2024'],
+    'amount': [-3000, -8000],
+    'desc': ['Netflix', 'Rent'],
+    'balance': [102000, 94000],
+    'account_name': ['CommBank', 'CommBank'],
+    'account_type': ['Current', 'Current']
 }).astype(schema['dtypes'])
 
 # Expected result for partial overlap
 partial_overlap_correct_result = pd.DataFrame({
-    'Date': ['15/03/2024'],
-    'Amount': [-8000],
-    'Desc': ['Rent'],
-    'Balance': [94000],
-    'Account Name': ['CommBank'],
-    'Account Type': ['Current']
+    'date': ['15/03/2024'],
+    'amount': [-8000],
+    'desc': ['Rent'],
+    'balance': [94000],
+    'account_name': ['CommBank'],
+    'account_type': ['Current']
 }).astype(schema['dtypes'])
 
 # Entirely new data
 no_overlap_input = pd.DataFrame({
-    'Date': ['01/04/2024'],
-    'Amount': [-2000],
-    'Desc': ['Spotify'],
-    'Balance': [92000],
-    'Account Name': ['CommBank'],
-    'Account Type': ['Current']
+    'date': ['01/04/2024'],
+    'amount': [-2000],
+    'desc': ['Spotify'],
+    'balance': [92000],
+    'account_name': ['CommBank'],
+    'account_type': ['Current']
 }).astype(schema['dtypes'])
 
 # Expected result for no overlap
 no_overlap_correct_result = pd.DataFrame({
-    'Date': ['01/04/2024'],
-    'Amount': [-2000],
-    'Desc': ['Spotify'],
-    'Balance': [92000],
-    'Account Name': ['CommBank'],
-    'Account Type': ['Current']
+    'date': ['01/04/2024'],
+    'amount': [-2000],
+    'desc': ['Spotify'],
+    'balance': [92000],
+    'account_name': ['CommBank'],
+    'account_type': ['Current']
 }).astype(schema['dtypes'])
 
 # Exact copy of master
@@ -64,12 +64,12 @@ full_overlap_input = master.copy()
 
 # Expected result for full overlap
 full_overlap_correct_result = pd.DataFrame({
-    'Date': [],
-    'Amount': [],
-    'Desc': [],
-    'Balance': [],
-    'Account Name': [],
-    'Account Type': []
+    'date': [],
+    'amount': [],
+    'desc': [],
+    'balance': [],
+    'account_name': [],
+    'account_type': []
 }).astype(schema['dtypes'])
 
 def test_partial_overlap(monkeypatch):
@@ -94,10 +94,10 @@ def test_full_overlap(monkeypatch):
     pd.testing.assert_frame_equal(result,full_overlap_correct_result, check_dtype=False)
 
 null_df = pd.DataFrame({
-    'Date': ['01/01/2024'],
-    'Amount': [None],
-    'Desc': ['Coles'],
-    'Balance': [95000]
+    'date': ['01/01/2024'],
+    'amount': [None],
+    'desc': ['Coles'],
+    'balance': [95000]
 })
 
 def test_null_input_schema_validator():
@@ -105,12 +105,12 @@ def test_null_input_schema_validator():
         input_schema_validator.validate(null_df)
 
 master_schema = pd.DataFrame({
-    'Date': ['01/01/2024', '15/01/2024', '01/02/2024'],
-    'Amount': [-50.00, 100.00, -30.00],
-    'Desc': ['Coles', 'Salary', 'Netflix'],
-    'Balance': [950.00, 1050.00, 1020.00],
-    'Account Name': ['CommBank', 'CommBank', 'CommBank'],
-    'Account Type': ['Current', 'Current', 'Current']
+    'date': ['01/01/2024', '15/01/2024', '01/02/2024'],
+    'amount': [-50.00, 100.00, -30.00],
+    'desc': ['Coles', 'Salary', 'Netflix'],
+    'balance': [950.00, 1050.00, 1020.00],
+    'account_name': ['CommBank', 'CommBank', 'CommBank'],
+    'account_type': ['Current', 'Current', 'Current']
 }).astype(schema['dtypes'])
 
 def test_master_schema_validator():
@@ -118,9 +118,9 @@ def test_master_schema_validator():
         master_record_validator.validate(master_schema)
 
 accounts_df = pd.DataFrame({
-        'Account Name': [None],
-        'Account Type': [1],
-        'Last Updated': ['01/01/2024']
+        'account_name': [None],
+        'account_type': [1],
+        'last_updated': ['01/01/2024']
 })
 
 def test_accounts_schema_validator():
@@ -130,22 +130,22 @@ def test_accounts_schema_validator():
 # Read and Clean Testing
 # Tests null in all columns where they need to be dropped and tests correct pence conversion
 read_and_clean_input = pd.DataFrame({
-    'Date': ['01/02/2024', '15/03/2024','30/01/2024',None],
-    'Amount': [-30.00, -80.00, None,50.00],
-    'Desc': ['Netflix', 'Rent','Error','Haircut'],
-    'Balance': [1020.00, None, 26.75, 94.16],
+    'date': ['01/02/2024', '15/03/2024','30/01/2024',None],
+    'amount': [-30.00, -80.00, None,50.00],
+    'desc': ['Netflix', 'Rent','Error','Haircut'],
+    'balance': [1020.00, None, 26.75, 94.16],
 })
 
-read_and_clean_input['Date'] = pd.to_datetime(read_and_clean_input['Date'], format='%d/%m/%Y')
+read_and_clean_input['date'] = pd.to_datetime(read_and_clean_input['date'], format='%d/%m/%Y')
 
 read_and_clean_result = pd.DataFrame({
-    'Date': ['01/02/2024'],
-    'Amount': [-3000],
-    'Desc': ['Netflix'],
-    'Balance': [102000],
+    'date': ['01/02/2024'],
+    'amount': [-3000],
+    'desc': ['Netflix'],
+    'balance': [102000],
 })
 
-read_and_clean_result['Date'] = pd.to_datetime(read_and_clean_result['Date'], format='%d/%m/%Y')
+read_and_clean_result['date'] = pd.to_datetime(read_and_clean_result['date'], format='%d/%m/%Y')
 
 def test_read_and_clean(monkeypatch):
     monkeypatch.setattr(DataRepository, 'read_input_CSV', lambda *args, **kwargs: read_and_clean_input)
