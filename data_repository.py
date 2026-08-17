@@ -8,6 +8,8 @@ import duckdb
 class DataRepository:
     '''Handles all data file interactions - while class is not strictly needed at this stage is exists for when a DB is implemented'''
     def __init__(self):
+        import os
+        os.makedirs("Data", exist_ok=True)
         self.con = duckdb.connect("Data/data_base.db")
         self.schema = schema
         self._ensure_tables_exist()
