@@ -2,9 +2,9 @@ class FinancialBase:
     def __init__(self, repo):
         self.repo = repo
         self.schema = {
-        'dtypes': {'Amount': float, 'Desc': str, 'Balance': float, 'Account Name': str, 'Account Type': str},
-        'input_dtypes': {'Amount': float, 'Desc': str, 'Balance': float},
-        'date_columns': ['Date'],
+        'dtypes': {'amount': float, 'desc': str, 'balance': float, 'account_name': str, 'account_type': str},
+        'input_dtypes': {'amount': float, 'desc': str, 'balance': float},
+        'date_columns': ['date'],
         'date_format': '%d/%m/%Y',
         'minor_date_format': '%d',
         'minor_currency_format': '${x:1.2f}',

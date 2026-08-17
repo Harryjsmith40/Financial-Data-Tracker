@@ -2,10 +2,10 @@ import pandera.pandas as pa
 
 input_schema_validator = pa.DataFrameSchema(
     {
-        'Date': pa.Column(pa.DateTime),
-        'Amount': pa.Column(int),
-        'Desc': pa.Column(str, pa.Check.str_length(min_value=1)),
-        'Balance': pa.Column(int)
+        'date': pa.Column(pa.DateTime),
+        'amount': pa.Column(int),
+        'desc': pa.Column(str, pa.Check.str_length(min_value=1)),
+        'balance': pa.Column(int)
     },
     strict=True,
     coerce=False,
@@ -13,19 +13,19 @@ input_schema_validator = pa.DataFrameSchema(
 
 master_record_validator = pa.DataFrameSchema(
     {
-        'Date': pa.Column(pa.DateTime),
-        'Amount': pa.Column(int),
-        'Desc': pa.Column(str, pa.Check.str_length(min_value=1)),
-        'Balance': pa.Column(int),
-        'Account Name': pa.Column(str),
-        'Account Type': pa.Column(str)
+        'date': pa.Column(pa.DateTime),
+        'amount': pa.Column(int),
+        'desc': pa.Column(str, pa.Check.str_length(min_value=1)),
+        'balance': pa.Column(int),
+        'account_name': pa.Column(str),
+        'account_type': pa.Column(str)
     }
 )
 
 accounts_validator = pa.DataFrameSchema(
     {
-        'Account Name': pa.Column(str),
-        'Account Type': pa.Column(str),
-        'Last Updated': pa.Column(pa.DateTime)
+        'account_name': pa.Column(str),
+        'account_type': pa.Column(str),
+        'last_updated': pa.Column(pa.DateTime)
     }
 )

@@ -23,7 +23,7 @@ class FinancialVisualiser(FinancialBase):
         # Prepares data for plotting by converting the table to a pivot table
         # Aligns axis for plotting Index = Date, columns='Account Name', values='Balance'
         # aggfunc=last - Keepings the last entry if multiple on the same date (this lines up with the way the input CSV is formatted from CommBank)
-        pivot_master = master_record.pivot_table(index='Date', columns='Account Name', values='Balance', aggfunc='last')
+        pivot_master = master_record.pivot_table(index='date', columns='account_name', values='balance', aggfunc='last')
         # Fills the days with no transactions on with the data from the last entry.
         # This is done as balance remains the same if no transaction happened
         # this enables the resolution to be a single day
@@ -65,8 +65,8 @@ class FinancialVisualiser(FinancialBase):
 
         # sets titles
         ax.set_title(title)
-        ax.set_xlabel('Date')
-        ax.set_ylabel('Amount')
+        ax.set_xlabel('date')
+        ax.set_ylabel('amount')
 
         plt.grid()
         plt.show()
@@ -77,11 +77,11 @@ class FinancialVisualiser(FinancialBase):
 
         # Filters for the master record to expenses or income based on choice
         if transaction_type == 'Expenses':
-            filtered_current = master_record[master_record['Amount'] < 0]
+            filtered_current = master_record[master_record['amount'] < 0]
             title = 'Expenses'
 
         elif transaction_type == 'Income':
-            filtered_current = master_record[master_record['Amount'] > 0]
+            filtered_current = master_record[master_record['amount'] > 0]
             title = 'Income'
         
         # Known Issue - Current internal transfers will show towards income and expenses in the data

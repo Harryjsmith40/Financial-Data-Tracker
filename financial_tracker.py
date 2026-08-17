@@ -12,57 +12,25 @@ class FinancialTracker(FinancialBase):
 
     def __init__(self, repo):
         '''Initialises the master record and accounts CSVs'''
-
         # Inherits the schema from the base class, FinancialBase
         super().__init__(repo)
-
-
-        # Checking if the master file exists
-        # Currently assumes ./Data/ exists if the user doesn't have ./Data/master_record.csv 
-        if os.path.exists(master_record_path):
-            # Checks structure of file is correct
-            master_record = repo.read_master()
-            if master_record.columns.tolist() == ['Date', 'Amount', 'Desc', 'Balance', 'Account Name', 'Account Type']:
-                logging.info('master_record initialised correctly')
-            else: 
-                logging.error('master_record exists with incorrect headers')
-                raise ValueError('master_record exists with incorrect headers')
-
-        # Creates it if it doesn't exist
-        else:
-            master_record = pd.DataFrame(columns=['Date', 'Amount', 'Desc', 'Balance', 'Account Name', 'Account Type'])
-            if os.path.exists(data_folder):
-                repo.create_master(master_record)
-            else:
-                os.mkdir(data_folder)
-                repo.create_master(master_record)
-
-        # Checks to see if the accounts CSV exists
-        if os.path.exists(account_info_path):
-            self.account_info = repo.read_account()
-            if self.account_info.columns.tolist() == ['Account Name', 'Account Type', 'Last Updated']:
-                logging.info('account_info initialised correctly')
-
-        # Creates the account CSV if it doesn't
-        else:
-            self.account_info = repo.write_account()
 
     def read_and_clean(self, file_path):
         '''Reads CSV files, formates dates and data types, removes null data and adds an index'''
         # Read the CSV file into a DataFrame
         df = self.repo.read_input_CSV(file_path)
         # Drops na values if the amount or date or balance is missing
-        df.dropna(subset=['Date','Amount','Balance'], inplace=True)
+        df.dropna(subset=['date','amount','balance'], inplace=True)
 
         # Converts columns to pence based logic to avoid floating point errors
-        df['Balance'] = df['Balance'].apply(lambda x: int(Decimal(str(x)) * 100))
-        df['Amount'] = df['Amount'].apply(lambda x: int(Decimal(str(x)) * 100))
+        df['balance'] = df['balance'].apply(lambda x: int(Decimal(str(x)) * 100))
+        df['amount'] = df['amount'].apply(lambda x: int(Decimal(str(x)) * 100))
 
         # Used to preserve intra-day transaction order from original export as resolution is 1 days but original export hold order of transactions within the day
         df.insert(0, 'Transaction Order', range(1, len(df) + 1))
 
         # Sort by date to maintain chronological order - Transaction Order descending as bank exports are reverse chronological
-        df.sort_values(by=['Date', 'Transaction Order'], inplace=True, ascending=[True, False])
+        df.sort_values(by=['date', 'Transaction Order'], inplace=True, ascending=[True, False])
         
         # Drops column in order to preserve simplifed file
         df.drop(columns=['Transaction Order'], inplace=True)
@@ -75,7 +43,7 @@ class FinancialTracker(FinancialBase):
         ''' Checks for and removes duplicates''' 
         master_record = self.repo.read_master()
         # Left merge master and input together
-        merged_df = cleaned_input.merge(master_record, how='left', on=['Date', 'Amount', 'Desc', 'Balance', 'Account Name', 'Account Type'], indicator=True)
+        merged_df = cleaned_input.merge(master_record, how='left', on=['date', 'amount', 'desc', 'balance', 'account_name', 'account_type'], indicator=True)
         # Drops all but the things existing in the input only
         merged_df = merged_df[merged_df['_merge'] == 'left_only']
         # drops the extra column that indicates the merge origins
@@ -88,13 +56,14 @@ class FinancialTracker(FinancialBase):
     def select_account(self):
         
         while True:
-            # Iteractively prints the account names from account csvand types for the user to select from
-            for index, row in self.account_info.iterrows():
-                print(index, row['Account Name'])
+            # Iteractively prints the account names from account csv and types for the user to select from
+            accounts = self.repo.read_accounts()
+
+            print(accounts)
             print('A Add New Account')
             print('B Back to main menu')
 
-            account_name_option = input('Please provide the number/letter of the account this data is from: ')
+            account_name_option = input('Please provide the account_id of the account this data is from: ')
 
             # Creates new account
             if account_name_option.upper() == 'A':
@@ -120,14 +89,14 @@ class FinancialTracker(FinancialBase):
                     continue
 
                 # Checks if number falls within the range of existing accounts
-                if selection < len(self.account_info):
-                    account_info = self.repo.read_account()
+                if selection < len(accounts)+1:
+                    account_info = self.repo.read_accounts()
                     # Reads the account details and returns them
-                    account_name = account_info.loc[selection, 'Account Name']
-                    account_type = account_info.loc[selection, 'Account Type']
+                    account_name = account_info.loc[selection, 'account_name']
+                    account_type = account_info.loc[selection, 'account_type']
 
                     # Updates the timestamp of the account updated to
-                    self.repo.update_timestamp(selection, account_info)
+                    self.repo.update_timestamp(selection)
 
                     return account_name, account_type
 
@@ -162,8 +131,8 @@ class FinancialTracker(FinancialBase):
                 
                 # Assigns the account details for uploading to master
                 account_name, account_type = result
-                cleaned_input['Account Name'] = account_name
-                cleaned_input['Account Type'] = account_type
+                cleaned_input['account_name'] = account_name
+                cleaned_input['account_type'] = account_type
 
                 # Checks and removes duplicates from the uploaded file
                 deduplicated_input = self.deduplicate(cleaned_input)
