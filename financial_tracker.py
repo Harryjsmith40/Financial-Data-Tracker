@@ -8,7 +8,7 @@ import logging
 from decimal import Decimal
 
 class FinancialTracker(FinancialBase):
-    '''A finnacial tracker designed to help make inform make data based decisions'''    
+    '''A finacial tracker designed to help make inform make data based decisions'''    
 
     def __init__(self, repo):
         '''Initialises the master record and accounts CSVs'''
