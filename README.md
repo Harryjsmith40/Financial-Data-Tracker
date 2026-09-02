@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- Python 3.13.13
+- Python 3.14.3
 - CSV export from your bank
 
 ## Installation
@@ -39,7 +39,7 @@ Both tables use a DuckDB `SEQUENCE` to auto-generate primary keys, since DuckDB 
 
 This project's read pattern is aggregation-heavy (net worth over time, spending/income by category, sums across accounts) rather than single-row lookups — an OLAP-shaped workload. DuckDB's columnar storage is optimised for scanning and aggregating across columns, whereas SQLite's row-oriented storage is optimised for OLTP-style single-row reads/writes. DuckDB also queries pandas DataFrames directly without a separate load step, fitting the existing pandas-based pipeline.
 
-```
+```mermaid
 flowchart TD
     A([Start]) --> B{Upload or Visualise?}
     B -->|A Upload| C[Upload File]
@@ -109,8 +109,8 @@ Key Stages:
 The basic program
 
 - 1. Basic shell i/o that takes CSV from my main account, stores it in a master record, cleans data to ensure no repeats or invalid data
-- 1.2 Add the ability to use multiple accounts *(developed before 1.1, as multi-account support was required for meaningful visualisation)*
-- 1.1 Track and visualise net worth, spending and income *(developed after 1.2)*
+- 1.1 Track and visualise net worth, spending and income
+- 1.2 Add the ability to use multiple accounts 
 - 1.3 Migrate storage from CSV to a DuckDB database, to support the aggregation-heavy access pattern above and remove manual file handling
 
 ### Stage 2
