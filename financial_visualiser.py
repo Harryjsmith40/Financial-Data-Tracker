@@ -19,19 +19,17 @@ class FinancialVisualiser(FinancialBase):
         '''Displays a graph of networth over time'''
 
         title='Net Worth'
-        # Prepares data for plotting by converting the table to a pivot table
-        # Aligns axis for plotting Index = Date, columns='Account Name', values='Balance'
-        # aggfunc=last - Keepings the last entry if multiple on the same date (this lines up with the way the input CSV is formatted from CommBank)
-        pivot_master = master_record.pivot_table(index='date', columns='account_name', values='balance', aggfunc='last')
-        # Fills the days with no transactions on with the data from the last entry.
-        # This is done as balance remains the same if no transaction happened
-        # this enables the resolution to be a single day
-        filled_master = pivot_master.ffill(axis='index')
-        # Now there is one transaction per day we can sum those across all accounts
-        # in order to get the Total balance per dayor net worth on a given day
-        daily_networth = filled_master.sum(axis='columns')
 
-        daily_networth_unit_currency = FinancialVisualiser.convert_to_unit_currency(daily_networth)
+        # Python and pandas logic
+        # pivot_master = master_record.pivot_table(index='date', columns='account_name', values='balance', aggfunc='last')
+        # filled_master = pivot_master.ffill(axis='index')
+        # daily_networth = filled_master.sum(axis='columns')
+
+        # SQL logic
+        daily_networth = self.repo.read_daily_net_worth()
+
+        # Account for interger based storage in pence/cents
+        daily_networth_unit_currency = self.convert_to_unit_currency(daily_networth)
 
         self.plot_graph(daily_networth_unit_currency, title)
 
@@ -89,7 +87,7 @@ class FinancialVisualiser(FinancialBase):
         pivot_filter_current = filtered_current.pivot_table(index='date', columns='account_name', values='amount', aggfunc='sum')
         daily_transactions = pivot_filter_current.sum(axis='columns')
 
-        daily_transactions_unit_currency = FinancialVisualiser.convert_to_unit_currency(daily_transactions)
+        daily_transactions_unit_currency = self.convert_to_unit_currency(daily_transactions)
 
         self.plot_graph(daily_transactions_unit_currency, title)
 
@@ -126,7 +124,6 @@ class FinancialVisualiser(FinancialBase):
                 print('Invalid Input Please Try Again')
                 logging.info('Visualisation Options - Invalid Input Please Try Again')
 
-    @staticmethod
-    def convert_to_unit_currency(data):
+    def convert_to_unit_currency(self, data):
         '''Converts back to unit currency for plotting'''
         return data / 100
