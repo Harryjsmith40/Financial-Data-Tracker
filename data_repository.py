@@ -1,5 +1,4 @@
 from Config.config import schema
-from financial_base import FinancialBase
 
 import logging
 import pandas as pd

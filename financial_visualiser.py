@@ -1,19 +1,19 @@
-from Config.config import data_folder
+from Config.config import data_folder, schema
 from matplotlib.dates import DateFormatter as DF, WeekdayLocator as WL, MonthLocator as MnL, DayLocator as DL, num2date
 from matplotlib.ticker import AutoMinorLocator, AutoLocator, FuncFormatter
-from financial_base import FinancialBase
 
 import matplotlib.pyplot as plt
 import pandas as pd
 import sys
 import logging
 
-class FinancialVisualiser(FinancialBase):
+class FinancialVisualiser:
     # Defines the data types of the files and the date formatting
 
     def __init__(self, repo):
         # Inherits the schema from the base class, FinancialBase
-        super().__init__(repo)
+        self.repo = repo
+        self.schema = schema
 
     def net_worth_plot(self, master_record):
         '''Displays a graph of networth over time'''
