@@ -1,8 +1,10 @@
 from Config.config import schema
+from schema_validators import input_schema_validator, master_record_validator, accounts_validator
 
 import logging
 import pandas as pd
 import duckdb
+import pandera as pa
 
 class DataRepository:
     '''Handles all data file interactions - while class is not strictly needed at this stage exists for when a DB is implemented'''
@@ -20,8 +22,14 @@ class DataRepository:
 
     def append_master(self, df):
         '''Updates master_record.csv to include new data'''
+        # Validates Data Structure
+        try:
+            validated_df = master_record_validator.validate(df)
+        except pa.errors.SchemaError as exc:
+            logging.error(f'Master record validation failed: {exc}')
+            raise
         # Appends to master_record.csv the new data
-        self.con.sql("INSERT INTO master (amount, date, \"desc\", balance, account_name, account_type) SELECT amount, date, \"desc\", balance, account_name, account_type FROM df")
+        self.con.sql("INSERT INTO master (amount, date, \"desc\", balance, account_name, account_type) SELECT amount, date, \"desc\", balance, account_name, account_type FROM validated_df")
         logging.info('Successfully appended to master')
 
     def read_accounts(self):
@@ -36,8 +44,18 @@ class DataRepository:
 
     def create_account(self, account_name, account_type):
         '''Creates a new account in the account table'''
-        self.con.sql("INSERT INTO accounts VALUES (nextval('accounts_id_sequence'),?,?,current_timestamp);",
-        params=[account_name,account_type])
+        # Creates the df
+        df = pd.DataFrame({'account_name': [account_name],
+                           'account_type':[account_type],
+                           'last_updated':[pd.Timestamp.now()]})
+        # Validates Data Structure
+        try:
+            validated_df = accounts_validator.validate(df)
+        except pa.errors.SchemaError as exc:
+            logging.error(f'Account details validation failed: {exc}')
+            raise
+        # Appends to the accounts table
+        self.con.sql("INSERT INTO accounts (account_name, account_type, last_updated) SELECT account_name, account_type, last_updated FROM validated_df;"),
 
     def _ensure_tables_exist(self):
         if not self._table_exists('accounts'):
@@ -54,8 +72,15 @@ class DataRepository:
         return len(result) > 0
 
     def read_input_CSV(self, file_path):
+        # Read ipnut file
         df = pd.read_csv(file_path, names=['date', 'amount', 'desc', 'balance'], header=None, dtype=self.schema['input_dtypes'], parse_dates=schema['date_columns'], date_format=schema['date_format'])
-        return df
+        # Validate the df generated from the input
+        try:
+            validated_df = input_schema_validator.validate(df)
+        except pa.errors.SchemaError as exc:
+            logging.error(f'Input file details validation failed: {exc}')
+            raise
+        return validated_df 
 
     def read_daily_net_worth(self):
         daily_net_worth = self.con.sql("""
