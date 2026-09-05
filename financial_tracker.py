@@ -1,19 +1,19 @@
-from Config.config import data_folder
+from Config.config import data_folder, schema
 from schema_validators import input_schema_validator
-from financial_base import FinancialBase
 
 import os
 import pandas as pd
 import logging
 from decimal import Decimal
 
-class FinancialTracker(FinancialBase):
+class FinancialTracker:
     '''A finacial tracker designed to help make inform make data based decisions'''    
 
     def __init__(self, repo):
         '''Initialises the master record and accounts CSVs'''
         # Inherits the schema from the base class, FinancialBase
-        super().__init__(repo)
+        self.repo = repo
+        self.schema = schema
 
     def read_and_clean(self, file_path):
         '''Reads CSV files, formates dates and data types, removes null data and adds an index'''
