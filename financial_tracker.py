@@ -71,9 +71,9 @@ class FinancialTracker:
                 account_name = input('Please provide the name of the account this data is from: ')
                 account_type = input('Please provide the type of this account (e.g. current, savings, credit card): ')
 
-                self.repo.create_account(account_name, account_type)
+                account_id = self.repo.create_account(account_name, account_type)
 
-                return account_name, account_type
+                return account_id
             
             # Goes back to main menu
             elif account_name_option.upper() == 'B':
@@ -90,15 +90,10 @@ class FinancialTracker:
 
                 # Checks if number falls within the range of existing accounts
                 if selection < len(accounts)+1:
-                    account_info = self.repo.read_accounts()
-                    # Reads the account details and returns them
-                    account_name = account_info.loc[selection, 'account_name']
-                    account_type = account_info.loc[selection, 'account_type']
-
                     # Updates the timestamp of the account updated to
                     self.repo.update_timestamp(selection)
-
-                    return account_name, account_type
+                    # Returns account_id
+                    return int(selection)
 
                 # Fall back for invalid input
                 else:
@@ -130,9 +125,8 @@ class FinancialTracker:
                     return
                 
                 # Assigns the account details for uploading to master
-                account_name, account_type = result
-                cleaned_input['account_name'] = account_name
-                cleaned_input['account_type'] = account_type
+                account_id = result
+                cleaned_input['account_id'] = account_id
 
                 # Checks and removes duplicates from the uploaded file
                 deduplicated_input = self.deduplicate(cleaned_input)
