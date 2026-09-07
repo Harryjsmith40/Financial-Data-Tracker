@@ -34,9 +34,12 @@ class DataRepository:
         self.con.sql("INSERT INTO master (amount, date, \"desc\", balance, account_name, account_type) SELECT amount, date, \"desc\", balance, account_id FROM validated_df")
         logging.info('Successfully appended to master')
 
-    def read_accounts(self):
-        '''Reads the accounts CSV into a dataframe'''
-        account_info = self.con.sql("SELECT * FROM accounts").df().set_index("account_id")
+    def read_accounts(self, account_id="All"):
+        '''Reads the accounts table or selected account into a dataframe'''
+        if account_id == "All":
+            account_info = self.con.sql("SELECT * FROM accounts").df().set_index("account_id")
+        else:
+            account_info = self.con.sql("SELECT * FROM accounts WHERE account_id = ?", params=[account_id]).df().set_index("account_id")
         return account_info
     
     def update_timestamp(self, selection):
@@ -200,3 +203,21 @@ class DataRepository:
             # Deleted legacy rows
             self.con.execute("ALTER TABLE master DROP COLUMN account_name")
             self.con.execute("ALTER TABLE master DROP COLUMN account_type")
+
+    def delete_account(self,account_id):
+        
+        # Prints selected account and confirms user wants to delete
+        account_info = self.read_accounts(account_id)
+        print(account_info)
+        warning = input("Are you sure you want to delete the above account and all associated data (y/n)")
+
+        if warning.lower() == "y":
+            # Deletes the transactions associated with that account
+            self.con.sql("DELETE FROM master WHERE account_id = ?", params=[account_id])
+            print("Transactions successfully deleted from master")
+            # Deletes the account from the accounts table
+            self.con.sql("DELETE FROM accounts WHERE account_id = ?", params=[account_id])
+            print("Account successfully deleted from accounts")
+
+        else:
+            return

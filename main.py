@@ -11,14 +11,14 @@ def main():
 
     # Allows user to select what they want to do
     while True:
-        print('A Upload a file')
+        print('A Manage your accounts')
         print('B Visualise your account(s)')
         print('C Exit')
         upload_or_visualise = input('Please select an option from the list (A/B/C): ')
 
         if upload_or_visualise.upper() == "A":
             tracker = FinancialTracker(repo)
-            tracker.upload_file()
+            tracker.account_management_menu()
 
         elif upload_or_visualise.upper() == "B":
             visualiser = FinancialVisualiser(repo)
