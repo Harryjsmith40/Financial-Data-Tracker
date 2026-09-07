@@ -98,16 +98,14 @@ class DataRepository:
         daily_net_worth = self.con.sql("""
             WITH step1 AS (
                 SELECT 
-                    account_name,
-                    account_type,
+                    account_id,
                     date,
                     balance
                 FROM master m1
                 WHERE master_id = (
                     SELECT MAX(master_id)
                     FROM master m2 
-                    WHERE m1.account_name = m2.account_name
-                    AND m1.account_type = m2.account_type
+                    WHERE m1.account_id = m2.account_id
                     AND m1.date = m2.date
                 )
                 ORDER BY date
@@ -121,29 +119,26 @@ class DataRepository:
                 ) 
             ),
             accounts AS (
-                SELECT DISTINCT account_name, account_type
+                SELECT DISTINCT account_id
                 FROM master
             ),
             joined AS (
                 SELECT 
                     d.generate_series AS day,
-                    a.account_name,
-                    a.account_type,
+                    a.account_id,
                     s.balance
                 FROM date_spine d 
                 CROSS JOIN accounts a
                 LEFT JOIN step1 s ON d.generate_series = s.date
-                AND a.account_name = s.account_name
-                AND a.account_type = s.account_type
+                AND a.account_id = s.account_id
                 ORDER BY d.generate_series
             ),
             filled AS (
                 SELECT 
                     day,
-                    account_name,
-                    account_type,
+                    account_id,
                     LAST_VALUE(balance IGNORE NULLS) OVER (
-                        PARTITION BY account_name, account_type
+                        PARTITION BY account_id
                         ORDER BY day
                         ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
                     ) AS balance
@@ -152,7 +147,7 @@ class DataRepository:
             SELECT day, SUM(balance) AS net_worth
             FROM filled
             GROUP BY day
-            ORDER BY day
+            ORDER BY day;
         """).df().set_index("day")
         return daily_net_worth
     
