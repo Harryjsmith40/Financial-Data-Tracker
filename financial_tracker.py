@@ -53,27 +53,32 @@ class FinancialTracker:
 
         return merged_df
 
-    def select_account(self):
+    def select_account(self, type="normal"):
         
         while True:
             # Iteractively prints the account names from account csv and types for the user to select from
             accounts = self.repo.read_accounts()
 
             print(accounts)
-            print('A Add New Account')
+
+
+            # Allows code to be used to select account to delete
+            if type == "normal":
+                print('A Add New Account')
             print('B Back to main menu')
 
             account_name_option = input('Please provide the account_id of the account this data is from: ')
 
             # Creates new account
-            if account_name_option.upper() == 'A':
-                # User provides account name and type
-                account_name = input('Please provide the name of the account this data is from: ')
-                account_type = input('Please provide the type of this account (e.g. current, savings, credit card): ')
+            if type == "normal":
+                if account_name_option.upper() == 'A':
+                    # User provides account name and type
+                    account_name = input('Please provide the name of the account this data is from: ')
+                    account_type = input('Please provide the type of this account (e.g. current, savings, credit card): ')
 
-                account_id = self.repo.create_account(account_name, account_type)
+                    account_id = self.repo.create_account(account_name, account_type)
 
-                return account_id
+                    return account_id
             
             # Goes back to main menu
             elif account_name_option.upper() == 'B':
@@ -138,3 +143,25 @@ class FinancialTracker:
             else:
                 logging.error('Failed file does not exist')
                 print('Upload file - Failed file does not exist')
+
+    def account_management_menu(self):
+        
+        while True:
+            print("Please choose your management operation: ")
+            print("A - Upload a file")
+            print("B - Delete an account")
+            print("C - Back to main menu")
+
+            selection = input("")
+
+            if selection.upper() == "A":
+                self.upload_file()
+            elif selection.upper() == "B":
+                # Prompts user for account to delete
+                account_id = self.select_account(type="Delete")
+                self.repo.delete_account(account_id)
+            elif selection.upper() == "C":
+                break
+            else:
+                print('Invalid input please try again')
+                logging.error('Select account - Invalid input please try again')
