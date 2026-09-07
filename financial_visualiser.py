@@ -41,6 +41,10 @@ class FinancialVisualiser:
 
     def plot_graph(self, data, title):
         '''Configures all amount time graphs'''
+        
+        # applies style sheet
+        plt.style.use('Config/amount_over_date.mplstyle')
+        
         fig, ax = plt.subplots()
         ax.plot(data)
         
@@ -56,9 +60,6 @@ class FinancialVisualiser:
 
         ax.yaxis.set_major_locator(AutoLocator())
         ax.yaxis.set_major_formatter(self.schema['minor_currency_format'])
-
-        # applies style sheet
-        plt.style.use('Config/amount_over_date.mplstyle')
 
         # sets titles
         ax.set_title(title)
@@ -84,7 +85,7 @@ class FinancialVisualiser:
         # Known Issue - Current internal transfers will show towards income and expenses in the data
 
         # Converts to pivot table for plotting and sums daily transactions across all accounts into one datum
-        pivot_filter_current = filtered_current.pivot_table(index='date', columns='account_name', values='amount', aggfunc='sum')
+        pivot_filter_current = filtered_current.pivot_table(index='date', columns='account_id', values='amount', aggfunc='sum')
         daily_transactions = pivot_filter_current.sum(axis='columns')
 
         daily_transactions_unit_currency = self.convert_to_unit_currency(daily_transactions)
